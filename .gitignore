@@ -1,0 +1,39 @@
+# Ignore build outputs
+bin/
+obj/
+
+# Ignore Visual Studio files
+.vs/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+
+# ASP.NET temporary files
+**/.vs/
+
+# Rider project files
+.idea/
+
+# Logs
+*.log
+
+# Exclude database and local environment secrets
+*.db
+*.sqlite
+.env
+*.local.json
+
+# Exclude publish outputs
+publish/
+out/
+
+# Exclude NuGet packages
+*.nupkg
+*.snupkg
+# Packages folder can be uncommented if you have checked in packages in the past
+# /packages/
+
+# Resharper folder
+_ReSharper*/
