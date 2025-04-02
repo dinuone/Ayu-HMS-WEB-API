@@ -4,6 +4,9 @@ namespace BookInventory.Models
 {
     public class BaseEntity
     {
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
+
         [Column("created_by")]
         public string CreatedBy { get; set; }
 
