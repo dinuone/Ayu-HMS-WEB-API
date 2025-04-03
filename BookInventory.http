@@ -1,6 +1,0 @@
-@CeylonTripApp_HostAddress = http://localhost:5212
-
-GET {{CeylonTripApp_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -4,6 +4,7 @@ using BookInventory.Helpers;
 using BookInventory.Service.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace BookInventory.Controllers
 {
@@ -24,7 +25,17 @@ namespace BookInventory.Controllers
 
             AuthenticateResponse response = await userService.Authenticate(request);
 
-            return response.ToActionResult();
+            if (response.GetMessage() != null)
+            {
+                var msg = response.GetMessage();
+
+                var resp = new BaseResponse();
+                resp.GenerateResponse(new { message = msg }, HttpStatusCode.BadRequest);
+
+                return new JsonResult(resp) { StatusCode = 400 };
+            }
+
+           return response.ToActionResult();
         }
     }
 }
