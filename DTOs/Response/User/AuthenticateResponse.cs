@@ -1,8 +1,8 @@
-﻿using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 using System.Net;
 
-namespace BookInventory.DTOs.Response.User
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User
 {
     public class AuthenticateResponse : BaseResponse
     {
@@ -19,9 +19,9 @@ namespace BookInventory.DTOs.Response.User
         {
             var data = new
             {
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                user.Email,
+                user.FirstName,
+                user.LastName,
                 UserName = user.Username,
                 Token = token,
             };

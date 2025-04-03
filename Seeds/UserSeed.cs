@@ -1,5 +1,6 @@
-﻿using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using Harendra_Ayurveda_HMS_WEB_API;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookInventory.Seeds
@@ -24,9 +25,10 @@ namespace BookInventory.Seeds
                         Password = hashPassword,
                         Email = "admin@gmail.com",
                         Role = "Admin",
-                        isActive = true,
+                        IsActive = true,
                         FirstName = "super",
                         LastName = "admin",
+                        CreatedBy = "system"
                     },
 
                     new UserModel
@@ -35,9 +37,10 @@ namespace BookInventory.Seeds
                         Password = hashPassword,
                         Email = "user@gmail.com",
                         Role = "Cashier",
-                        isActive = true,
+                        IsActive = true,
                         FirstName = "test",
                         LastName = "user",
+                        CreatedBy = "system"
                     },
                  };
 

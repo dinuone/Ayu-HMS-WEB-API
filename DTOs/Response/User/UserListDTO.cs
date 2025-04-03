@@ -1,7 +1,7 @@
-﻿using BookInventory.Helpers.Utils;
+﻿using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using System.Text.Json.Serialization;
 
-namespace BookInventory.DTOs.Response.User
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User
 {
     public class UserListDTO
     {

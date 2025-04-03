@@ -7,6 +7,10 @@ namespace BookInventory.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Column("is_delete")]
+        public bool IsDelete { get; set; } = false;
+
+
         [Column("created_by")]
         public string CreatedBy { get; set; }
 

@@ -1,10 +1,9 @@
-﻿using BookInventory.DTOs.Request.Auth;
-using BookInventory.DTOs.Request.User;
-using BookInventory.DTOs.Response.User;
-using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 
-namespace BookInventory.Service.Auth
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 {
     public interface IUserService
     {

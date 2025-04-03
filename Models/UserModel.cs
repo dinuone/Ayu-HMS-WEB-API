@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BookInventory.Models;
 
-namespace BookInventory.Models
+namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
-    public class UserModel
+    public class UserModel : BaseEntity
     {
         [Key]
         [Column("id")]
@@ -27,11 +28,6 @@ namespace BookInventory.Models
         [Column("role")]
         public string Role { get; set; }
 
-        [Column("is_active")]
-        public bool isActive { get; set; }
-
-        [Column("created_at")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
+     
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace BookInventory.Helpers
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
     public interface IDbSeeder
     {

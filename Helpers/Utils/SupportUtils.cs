@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace BookInventory.Helpers.Utils
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils
 {
     public class SupportUtils
     {
