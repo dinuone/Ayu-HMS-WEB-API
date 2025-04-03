@@ -1,12 +1,16 @@
-using BookInventory;
-using BookInventory.Helpers;
-using BookInventory.Service.Auth;
+
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Serilog;
 using Microsoft.OpenApi.Models;
-using BookInventory.Middleware;
-using BookInventory.Service.Product;
+
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.Branch;
+
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
+using Harendra_Ayurveda_HMS_WEB_API;
+using Harendra_Ayurveda_HMS_WEB_API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,11 +28,9 @@ var serverVersion = new MySqlServerVersion(ServerVersion.Parse(version));
 
 GlobalAttributeHelper.mySqlConfiguration.connectionString = connectionString;
 
-
-
 // Add services to the container.
-builder.Services.AddScoped<IUserService , UserService>();
-builder.Services.AddScoped<IProductService, ProductService>();  
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -75,10 +77,7 @@ builder.Services.AddSwaggerGen(swagger =>
                 });
 });
 
-
-
 // Configure CORS
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -88,13 +87,9 @@ builder.Services.AddCors(options =>
                           .AllowCredentials());
 });
 
-
 builder.Services.AddHttpContextAccessor();
 
-
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -103,8 +98,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
 }
-
-
 
 app.UseHttpsRedirection();
 
@@ -118,8 +111,6 @@ app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
 
-
-
 // Create Db tables if not exists
 using (var scope = app.Services.CreateScope())
 {
@@ -130,7 +121,6 @@ using (var scope = app.Services.CreateScope())
     app.CreateDatabase(dbContext);
 
     DbSeeder.Seed(Assembly.GetEntryAssembly(), dbContext);
-
 }
 
 app.Run();

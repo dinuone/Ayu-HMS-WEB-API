@@ -1,9 +1,10 @@
-﻿using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using BookInventory.Models;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookInventory
+namespace Harendra_Ayurveda_HMS_WEB_API
 {
     public class ApplicationDBContext : DbContext
     {
@@ -18,7 +19,9 @@ namespace BookInventory
         }
 
         public DbSet<UserModel> Users { get; set; }
-        public DbSet<ProductModel> Products { get; set; }
+
+        public DbSet<BranchModel> Branches { get; set; }
+        public DbSet <TreatmentCategoryModel> TreatmentCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

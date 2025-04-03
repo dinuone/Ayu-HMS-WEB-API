@@ -1,7 +1,6 @@
-﻿using BookInventory.DTOs.Request.Auth;
-using BookInventory.DTOs.Response.User;
-using BookInventory.Helpers;
-using BookInventory.Service.Auth;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace BookInventory.Helpers
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
     public class GlobalAttributeHelper
     {

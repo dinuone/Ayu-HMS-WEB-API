@@ -1,11 +1,11 @@
-﻿using BookInventory.Service.Auth;
+﻿using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static BookInventory.Helpers.GlobalAttributeHelper;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
-namespace BookInventory.Middleware
+namespace Harendra_Ayurveda_HMS_WEB_API.Middleware
 {
     public class JwtMiddleware
     {

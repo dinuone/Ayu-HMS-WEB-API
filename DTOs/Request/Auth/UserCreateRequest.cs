@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace BookInventory.DTOs.Request.Auth
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth
 {
     public class UserCreateRequest
     {

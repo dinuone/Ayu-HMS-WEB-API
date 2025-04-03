@@ -1,8 +1,9 @@
-﻿using BookInventory.DTOs.Request.Auth;
-using BookInventory.DTOs.Request.User;
-using BookInventory.DTOs.Response.User;
-using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using BookInventory.DTOs.Request.User;
+using Harendra_Ayurveda_HMS_WEB_API;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +16,9 @@ using System.Net;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using static BookInventory.Helpers.GlobalAttributeHelper;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
-namespace BookInventory.Service.Auth
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 {
     public class UserService : IUserService
     {
@@ -115,7 +116,7 @@ namespace BookInventory.Service.Auth
                     Email = request.Email,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
-                    isActive = true,
+
                     Password = hashPassword,
                     Role = request.Role
                 };
@@ -172,7 +173,7 @@ namespace BookInventory.Service.Auth
                         Username = user.Username,
                         Email = user.Email,
                         Role = user.Role,
-                        IsActive = user.isActive,
+                        IsActive = user.IsActive,
                         FirtstName = user.FirstName,
                         LastName = user.LastName,
                         CreatedAt = user.CreatedAt
