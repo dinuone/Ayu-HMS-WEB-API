@@ -230,6 +230,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 DiseaseCode.DiseaseCode = request.DiseaseCode;
                 DiseaseCode.DiseaseName = request.DiseaseName;
                 DiseaseCode.Description = request.Description;
+                DiseaseCode.IsActive = request.IsActive;
 
                 _context.Set<DiseaseCodeManagementModel>().Update(DiseaseCode);
                 await _context.SaveChangesAsync();
