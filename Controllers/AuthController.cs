@@ -1,11 +1,12 @@
 ﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace BookInventory.Controllers
+namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
     [Route("api/auth")]
     [ApiController]
