@@ -26,39 +26,59 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 
         public async Task<BaseResponse> Create(BranchRequest request)
         {
-            var loggedInUser = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
-
-            BranchModel branch = new BranchModel
+            try
             {
-                Name = request.Name,
-                Address = request.Address,
-                PhoneNumber = request.PhoneNumber,
-                CreatedBy = loggedInUser,
+                var loggedInUser = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
 
-            };
+                if (loggedInUser == null)
+                {
+                    return BaseResponse.CreateResponse("User not logged in", HttpStatusCode.Unauthorized);
+                }
 
-            _context.Set<BranchModel>().Add(branch);
-            await _context.SaveChangesAsync();
+                BranchModel branch = new BranchModel
+                {
+                    Name = request.Name,
+                    Address = request.Address,
+                    PhoneNumber = request.PhoneNumber,
+                    CreatedBy = loggedInUser,
+                };
 
-            return BaseResponse.CreateResponse(branch, HttpStatusCode.Created);
+                _context.Set<BranchModel>().Add(branch);
+                await _context.SaveChangesAsync();
+
+                return BaseResponse.CreateResponse(branch, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while creating branch");
+                return BaseResponse.CreateResponse("An error occurred while creating the branch", HttpStatusCode.InternalServerError);
+            }
         }
 
         public async Task<BaseResponse> Update(int id, BranchRequest request)
         {
-            BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
-            if (branch == null)
+            try
             {
-                return BaseResponse.CreateResponse("Branch not found", HttpStatusCode.BadRequest);
+                BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
+                if (branch == null)
+                {
+                    return BaseResponse.CreateResponse("Branch not found", HttpStatusCode.BadRequest);
+                }
+
+                branch.Name = request.Name;
+                branch.Address = request.Address;
+                branch.PhoneNumber = request.PhoneNumber;
+
+                _context.Set<BranchModel>().Update(branch);
+                await _context.SaveChangesAsync();
+
+                return BaseResponse.CreateResponse(branch, HttpStatusCode.OK);
             }
-
-            branch.Name = request.Name;
-            branch.Address = request.Address;
-            branch.PhoneNumber = request.PhoneNumber;
-
-            _context.Set<BranchModel>().Update(branch);
-            await _context.SaveChangesAsync();
-
-            return BaseResponse.CreateResponse(branch, HttpStatusCode.OK);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating branch");
+                return BaseResponse.CreateResponse("An error occurred while updating the branch", HttpStatusCode.InternalServerError);
+            }
         }
 
         public async Task<BaseResponse> GetById(int id)
@@ -101,11 +121,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                         message = ex.Message
                     }
                 };
+                logger.LogError(ex, "Error occurred while getting branch by id");
                 return response;
             }
-           
-
-            
         }
 
         public async Task<BaseResponse> GetAll()
@@ -115,7 +133,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
             {
                 List<BranchModel> branches = await _context.Branches.Where(b => b.IsDelete == false).ToListAsync();
 
-                List<BranchListDTO> BranchListMapp = [];
+                List<BranchListDTO> BranchListMapp = new List<BranchListDTO>();
                 foreach (var branch in branches)
                 {
                     BranchListMapp.Add(new BranchListDTO
@@ -148,7 +166,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 };
                 return response;
             }
-          
         }
 
         public async Task<BaseResponse> Delete(int id)
