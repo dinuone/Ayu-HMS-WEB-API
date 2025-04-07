@@ -8,6 +8,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
         public int Id { get; set; }
         [Required]
         [Column("name", TypeName = "varchar(128)")]

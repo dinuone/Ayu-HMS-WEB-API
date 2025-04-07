@@ -8,8 +8,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
-        public int DiseaseCodeId { get; set; }
+        [Column("id")]
+        public int Id { get; set; }
 
         [Required]
         [Column("Diseasecode", TypeName = "varchar(128)")]
