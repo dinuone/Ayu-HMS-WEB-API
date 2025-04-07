@@ -10,16 +10,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
         [Column("name", TypeName = "varchar(128)")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Column("address", TypeName = "varchar(256)")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [Column("phone_number", TypeName = "varchar(15)")]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
-      
     }
 }

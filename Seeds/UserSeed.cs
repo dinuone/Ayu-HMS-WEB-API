@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookInventory.Seeds
 {
-    public class RoleSeed : IDbSeeder
+    public class UserSeed : IDbSeeder
     {
         public void Initialize(DbContext dbContext)
         {

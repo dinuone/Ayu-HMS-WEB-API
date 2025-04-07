@@ -17,5 +17,12 @@ namespace BookInventory.Models
         [Column("created_at")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; }
+
+        [Column("updated_by")]
+        public string? UpdatedBy { get; set; }  // Tracks who updated the entity
+
+        [Column("updated_at")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] // Automatically set by database
+        public DateTime? UpdatedAt { get; set; }
     }
 }

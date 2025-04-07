@@ -27,5 +27,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth
 
         [JsonPropertyName("email")]
         public string Email { get; set; }
+
+        [JsonPropertyName("branches")]
+        public List<long> Branches { get; set; }
+
+        [JsonPropertyName("is_active")]
+        public bool IsActive { get; set; }
+
     }
 }

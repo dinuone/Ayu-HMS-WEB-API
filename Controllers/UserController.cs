@@ -4,6 +4,8 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using AuthorizeAttribute = Harendra_Ayurveda_HMS_WEB_API.Helpers.AuthorizeAttribute;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
@@ -23,6 +25,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create(UserCreateRequest request)
         {
+       
             BaseResponse response = await userService.Create(request);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
@@ -35,7 +38,27 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
-       
-     
+        // Update User
+        [Authorize]
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(int id, UserCreateRequest request)
+        {
+            // Call the service to update the user details
+            BaseResponse response = await userService.Update(id, request);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        // Delete User (Soft Delete)
+        [Authorize]
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            // Call the service to delete (soft delete) the user
+            BaseResponse response = await userService.Delete(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+
+
     }
 }
