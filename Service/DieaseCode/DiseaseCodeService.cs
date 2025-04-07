@@ -135,7 +135,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 {
                     DiseaseCodeListMapp.Add(new DiseaseCodeListDTO
                     {
-                        DiseaseCodeId = DiseaseCode.DiseaseCodeId,
+                        DiseaseCodeId = DiseaseCode.Id,
                         DiseaseCode = DiseaseCode.DiseaseCode,
                         DiseaseName = DiseaseCode.DiseaseName,
                         Description = DiseaseCode.Description,
