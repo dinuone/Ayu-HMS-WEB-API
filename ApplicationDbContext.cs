@@ -23,7 +23,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet<BranchModel> Branches { get; set; }
         public DbSet <TreatmentCategoryModel> TreatmentCategories { get; set; }
         public DbSet<ClinicCategoryModel> ClinicCategories { get; set; }
-        public DbSet <DiseaseCodeManagementModel> DiseaseCodes { get; set; }
+        public DbSet <DiseaseCodeModel> DiseaseCodes { get; set; }
+        public DbSet<DrugCategoryModel> drugcategories { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

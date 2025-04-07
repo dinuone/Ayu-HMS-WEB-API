@@ -40,14 +40,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                     };
                     return response;
                 }
-                DiseaseCodeManagementModel DiseaseCode = new DiseaseCodeManagementModel
+                DiseaseCodeModel DiseaseCode = new DiseaseCodeModel
                 {
                     DiseaseCode = request.DiseaseCode,
                     DiseaseName = request.DiseaseName,
                     Description = request.Description,
                     CreatedBy = loggedInUser,
                 };
-                _context.Set<DiseaseCodeManagementModel>().Add(DiseaseCode);
+                _context.Set<DiseaseCodeModel>().Add(DiseaseCode);
                 await _context.SaveChangesAsync();
 
                 response = new BaseResponse()
@@ -81,7 +81,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             BaseResponse response;
             try
             {
-                DiseaseCodeManagementModel? DiseaseCode = await _context.Set<DiseaseCodeManagementModel>().FindAsync(id);
+                DiseaseCodeModel? DiseaseCode = await _context.Set<DiseaseCodeModel>().FindAsync(id);
                 if (DiseaseCode == null)
                 {
                     response = new BaseResponse()
@@ -128,7 +128,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             BaseResponse response;
             try
             {
-                List<DiseaseCodeManagementModel> DiseaseCodes = await _context.DiseaseCodes.Where(dc => dc.IsDelete == false).ToListAsync();
+                List<DiseaseCodeModel> DiseaseCodes = await _context.DiseaseCodes.Where(dc => dc.IsDelete == false).ToListAsync();
                 List<DiseaseCodeListDTO> DiseaseCodeListMapp = new List<DiseaseCodeListDTO>();
 
                 foreach (var DiseaseCode in DiseaseCodes)
@@ -173,7 +173,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             BaseResponse response;
             try
             {
-                DiseaseCodeManagementModel? DiseaseCode = await _context.Set<DiseaseCodeManagementModel>().FindAsync(id);
+                DiseaseCodeModel? DiseaseCode = await _context.Set<DiseaseCodeModel>().FindAsync(id);
                 if (DiseaseCode == null)
                 {
                     response = new BaseResponse()
@@ -214,7 +214,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             BaseResponse response;
             try
             {
-                DiseaseCodeManagementModel? DiseaseCode = await _context.Set<DiseaseCodeManagementModel>().FindAsync(id);
+                DiseaseCodeModel? DiseaseCode = await _context.Set<DiseaseCodeModel>().FindAsync(id);
                 if (DiseaseCode == null)
                 {
                     response = new BaseResponse()
@@ -232,7 +232,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 DiseaseCode.Description = request.Description;
                 DiseaseCode.IsActive = request.IsActive;
 
-                _context.Set<DiseaseCodeManagementModel>().Update(DiseaseCode);
+                _context.Set<DiseaseCodeModel>().Update(DiseaseCode);
                 await _context.SaveChangesAsync();
 
                 response = new BaseResponse()

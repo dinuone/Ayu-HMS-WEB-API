@@ -139,7 +139,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                         TreatmentName = treatmentCategory.TreatmentName,
                         Description = treatmentCategory.Description,
                         CreatedBy = treatmentCategory.CreatedBy,
-                        CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(treatmentCategory.CreatedAt, localTimeZone)
+                        CreatedAt = treatmentCategory.CreatedAt,
                         
                     });
                 }
@@ -228,6 +228,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 }
                 treatmentCategory.TreatmentName = request.TreatmentName;
                 treatmentCategory.Description = request.Description;
+                treatmentCategory.IsActive = request.IsActive;  
 
                 _context.Set<TreatmentCategoryModel>().Update(treatmentCategory);
                 await _context.SaveChangesAsync();

@@ -4,7 +4,7 @@ using BookInventory.Models;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
-    public class DiseaseCodeManagementModel : BaseEntity
+    public class DiseaseCodeModel : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
