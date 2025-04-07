@@ -28,6 +28,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("role")]
         public string Role { get; set; }
 
-     
+
     }
 }
