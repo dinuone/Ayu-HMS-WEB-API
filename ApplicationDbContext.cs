@@ -19,9 +19,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         }
 
         public DbSet<UserModel> Users { get; set; }
-
         public DbSet<BranchModel> Branches { get; set; }
         public DbSet <TreatmentCategoryModel> TreatmentCategories { get; set; }
+        public DbSet<UserBranchModel> UserBranches { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

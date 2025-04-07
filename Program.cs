@@ -99,6 +99,8 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigin");
@@ -108,6 +110,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<JwtMiddleware>();
+
+app.UseMiddleware<CreateByMiddleware>();
 
 app.MapControllers();
 

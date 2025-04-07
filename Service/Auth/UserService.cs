@@ -27,13 +27,17 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
         private readonly ILogger<UserService> logger;
         TimeZoneInfo localTimeZone;
         private readonly IConfiguration configuration;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public UserService(IConfiguration configuration, ApplicationDBContext dBContext, ILogger<UserService> logger)
+
+        public UserService(IConfiguration configuration, ApplicationDBContext dBContext, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
             this.dBContext = dBContext;
             this.logger = logger;
             localTimeZone = TimeZoneInfo.Local;
             this.configuration = configuration;
+            this.httpContextAccessor = httpContextAccessor;
+   
         }
 
         public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest request)
@@ -85,74 +89,203 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 
         public async Task<BaseResponse> Create(UserCreateRequest request)
         {
+            using var transaction = await dBContext.Database.BeginTransactionAsync();
 
-            BaseResponse response;
-            logger.LogInformation("User Create :::::");
             try
             {
-
-                UserModel? user = await dBContext.Users.FirstOrDefaultAsync(x => x.Username == request.UserName);
-
-                if(user == null)
+                // Check if username already exists
+                var existingUser = await dBContext.Users.FirstOrDefaultAsync(u => u.Username == request.UserName);
+                if (existingUser != null)
                 {
-                    response = new BaseResponse()
+                    return new BaseResponse
                     {
                         StatusCode = (int)HttpStatusCode.BadRequest,
-                        Data = new
-                        {
-                            message = "username Already Exist"
-                        }
+                        Data = new { message = "Username already exists" }
                     };
-
-                    return response;
                 }
 
-                //hashing the password
-                string hashPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                UserModel newUser = new UserModel()
+                // Hash password
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+                // Create and save user
+                var newUser = new UserModel
                 {
                     Username = request.UserName,
                     Email = request.Email,
                     FirstName = request.FirstName,
                     LastName = request.LastName,
-
-                    Password = hashPassword,
-                    Role = request.Role
+                    Password = hashedPassword,
+                    Role = request.Role,
+                    CreatedBy = createdBy,
+                  
                 };
 
-                response = new BaseResponse()
+                dBContext.Users.Add(newUser);
+                await dBContext.SaveChangesAsync(); // Save first to get newUser.Id
+
+                // Add user-branch relationships
+                var userBranches = request.Branches.Select(branchId => new UserBranchModel
+                {
+                    UserId = newUser.Id,
+                    BranchId = (int)branchId // assuming branchId is int
+                });
+
+                await dBContext.AddRangeAsync(userBranches);
+                await dBContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = new
-                    {
-                        message = "User Account Created"
-                    }
+                    Data = new { message = "User account created successfully." }
                 };
-
-                return response;
-
-
             }
             catch (Exception ex)
             {
-                response = new BaseResponse()
+                await transaction.RollbackAsync();
+                logger.LogError("User creation failed: " + ex.Message);
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new
-                    {
-                        message = ex.Message
-                    }
+                    Data = new { message = "User creation failed." }
                 };
-
-                logger.LogInformation("User Create Exception :::::" + ex.Message);
-
-                return response;
             }
-
         }
 
-    
+        public async Task<BaseResponse> Update(int id, UserCreateRequest request)
+        {
+            try
+            {
+                var user = await dBContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+                if (user == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "User not found" }
+                    };
+                }
+
+                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                user.Username = request.UserName;
+                user.Email = request.Email;
+                user.FirstName = request.FirstName;
+                user.LastName = request.LastName;
+                user.Role = request.Role;
+                user.IsActive = request.IsActive;
+                user.UpdatedBy = updatedBy;
+
+                dBContext.Users.Update(user);
+                await dBContext.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "User updated successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("User update failed: " + ex.Message);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "User update failed." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> Delete(int id)
+        {
+            try
+            {
+                var user = await dBContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+                if (user == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "User not found" }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                user.IsDelete = true;
+                user.UpdatedBy = deletedBy;
+
+                dBContext.Users.Update(user);
+                await dBContext.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "User deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("User delete failed: " + ex.Message);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "User delete failed." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DeleteAll(List<int> userIds)
+        {
+            try
+            {
+                var users = await dBContext.Users
+                    .Where(u => userIds.Contains(u.Id) && !u.IsDelete)
+                    .ToListAsync();
+
+                if (!users.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "No valid users found to delete." }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var user in users)
+                {
+                    user.IsDelete = true;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    user.UpdatedBy = deletedBy;
+                }
+
+                dBContext.Users.UpdateRange(users);
+                await dBContext.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Users deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Bulk delete failed: " + ex.Message);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "Bulk delete failed." }
+                };
+            }
+        }
+
+
+
         public async Task<BaseResponse>List()
         {
             BaseResponse response;
