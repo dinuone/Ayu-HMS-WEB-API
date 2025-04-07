@@ -11,6 +11,8 @@ using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Harendra_Ayurveda_HMS_WEB_API;
 using Harendra_Ayurveda_HMS_WEB_API.Middleware;
+using Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,8 @@ GlobalAttributeHelper.mySqlConfiguration.connectionString = connectionString;
 // Add services to the container.
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<ITreatmentCategoryService, TreatmentCategoryService>();
+builder.Services.AddScoped<IClinicCategoryService, ClinicCategoryService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -1,0 +1,14 @@
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DiseaseCodeRequest;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
+{
+    public interface IDiseaseCodeService
+    {
+        Task<BaseResponse> Create(DiseaseCodeRequest request);
+        Task<BaseResponse> Update(int id, DiseaseCodeRequest request);
+        Task<BaseResponse> GetById(int id);
+        Task<BaseResponse> GetAll();
+        Task<BaseResponse> Delete(int id);
+    }
+}

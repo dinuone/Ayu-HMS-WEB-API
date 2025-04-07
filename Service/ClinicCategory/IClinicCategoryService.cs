@@ -1,0 +1,14 @@
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.ClinicCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
+{
+    public interface IClinicCategoryService
+    {
+        Task<BaseResponse>Create(AddClinicCategoryRequest request);
+        Task<BaseResponse> Update(int id, AddClinicCategoryRequest request);
+        Task<BaseResponse> GetById(int id);
+        Task<BaseResponse> GetAll();
+        Task<BaseResponse> Delete(int id);
+    }
+}
