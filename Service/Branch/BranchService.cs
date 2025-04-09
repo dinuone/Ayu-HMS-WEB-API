@@ -7,6 +7,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
 using System.Security.Claims;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 {
@@ -33,7 +34,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 
                 if (loggedInUser == null)
                 {
-                    return BaseResponse.CreateResponse("User not logged in", HttpStatusCode.Unauthorized);
+                    return BaseResponse.CreateResponse("User is not logged in.", HttpStatusCode.Unauthorized);
                 }
 
                 BranchModel branch = new BranchModel
@@ -47,12 +48,20 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 _context.Set<BranchModel>().Add(branch);
                 await _context.SaveChangesAsync();
 
-                return BaseResponse.CreateResponse(branch, HttpStatusCode.Created);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Branch created successfully." }
+                };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error occurred while creating branch");
-                return BaseResponse.CreateResponse("An error occurred while creating the branch", HttpStatusCode.InternalServerError);
+                logger.LogError(ex, "Error occurred while creating branch.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while creating the branch." }
+                };
             }
         }
 
@@ -63,7 +72,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
                 if (branch == null)
                 {
-                    return BaseResponse.CreateResponse("Branch not found", HttpStatusCode.BadRequest);
+                    return BaseResponse.CreateResponse("Branch not found.", HttpStatusCode.BadRequest);
                 }
 
                 branch.Name = request.Name;
@@ -73,36 +82,37 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 _context.Set<BranchModel>().Update(branch);
                 await _context.SaveChangesAsync();
 
-                return BaseResponse.CreateResponse(branch, HttpStatusCode.OK);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Branch updated successfully." }
+                };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error occurred while updating branch");
-                return BaseResponse.CreateResponse("An error occurred while updating the branch", HttpStatusCode.InternalServerError);
+                logger.LogError(ex, "Error occurred while updating branch.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while updating the branch." }
+                };
             }
         }
 
         public async Task<BaseResponse> GetById(int id)
         {
-            BaseResponse response;
             try
             {
                 BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
                 if (branch == null)
                 {
-                    response = new BaseResponse()
+                    return new BaseResponse
                     {
                         StatusCode = (int)HttpStatusCode.BadRequest,
-                        Data = new
-                        {
-                            message = "Branch not found"
-                        }
+                        Data = new { message = "Branch not found." }
                     };
-
-                    return response;
                 }
 
-                // Manual mapping
                 var dto = new BranchListDTO
                 {
                     Id = branch.Id,
@@ -111,132 +121,124 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                     Address = branch.Address
                 };
 
-                response = new BaseResponse()
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = dto
                 };
-
-                return response;
             }
             catch (Exception ex)
             {
-                response = new BaseResponse()
+                logger.LogError(ex, "Error occurred while retrieving branch by ID.");
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new
-                    {
-                        message = ex.Message
-                    }
+                    Data = new { message = "An error occurred while retrieving the branch." }
                 };
-                logger.LogError(ex, "Error occurred while getting branch by id");
-                return response;
             }
         }
 
-
         public async Task<BaseResponse> GetAll()
         {
-            BaseResponse response;
             try
             {
-                List<BranchModel> branches = await _context.Branches.Where(b => b.IsDelete == false).ToListAsync();
+                List<BranchModel> branches = await _context.Branches.Where(b => !b.IsDelete).ToListAsync();
 
-                List<BranchListDTO> BranchListMapp = new List<BranchListDTO>();
-                foreach (var branch in branches)
+                var branchList = branches.Select(branch => new BranchListDTO
                 {
-                    BranchListMapp.Add(new BranchListDTO
-                    {
-                        Id = branch.Id,
-                        Name = branch.Name,
-                        PhoneNumber = branch.PhoneNumber,
-                        Address = branch.Address,
-                        CreatedAt = branch.CreatedAt,
-                        CreatedBy = branch.CreatedBy,
-                        IsActive = branch.IsActive
-                    });
-                }
+                    Id = branch.Id,
+                    Name = branch.Name,
+                    PhoneNumber = branch.PhoneNumber,
+                    Address = branch.Address,
+                    CreatedAt = branch.CreatedAt,
+                    CreatedBy = branch.CreatedBy,
+                    IsActive = branch.IsActive
+                }).ToList();
 
-                response = new BaseResponse()
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = BranchListMapp
+                    Data = branchList
                 };
-
-                return response;
             }
             catch (Exception ex)
             {
-                response = new BaseResponse()
+                logger.LogError(ex, "Error occurred while retrieving all branches.");
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new
-                    {
-                        message = ex.Message
-                    }
+                    Data = new { message = "An error occurred while retrieving branches." }
                 };
-                return response;
             }
         }
 
         public async Task<BaseResponse> Delete(int id)
         {
-            BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
-
-            if (branch == null || branch.IsDelete)
+            try
             {
-                return BaseResponse.CreateResponse("Branch not found", HttpStatusCode.NotFound);
+                BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
+
+                if (branch == null || branch.IsDelete)
+                {
+                    return BaseResponse.CreateResponse("Branch not found.", HttpStatusCode.NotFound);
+                }
+
+                branch.IsDelete = true;
+
+                var userBranches = await _context.UserBranches
+                    .Where(ub => ub.BranchId == id)
+                    .ToListAsync();
+
+                _context.UserBranches.RemoveRange(userBranches);
+
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Branch deleted successfully." }
+                };
             }
-
-            // Soft-delete the branch
-            branch.IsDelete = true;
-
-            // Delete related UserBranches
-            var userBranches = await _context.UserBranches
-                .Where(ub => ub.BranchId == id)
-                .ToListAsync();
-
-            _context.UserBranches.RemoveRange(userBranches); // Or soft-delete if required
-
-            await _context.SaveChangesAsync();
-
-            return BaseResponse.CreateResponse("Branch deleted successfully", HttpStatusCode.OK);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while deleting branch.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while deleting the branch." }
+                };
+            }
         }
-
 
         public async Task<BaseResponse> UpdateStatus(int id)
         {
-            BaseResponse response;
             try
             {
-                BranchModel? branch = await _context.Branches.Where(u => u.IsDelete == false && u.Id == id).FirstOrDefaultAsync();
+                var branch = await _context.Branches.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
 
-                if (branch != null)
+                if (branch == null)
                 {
-                    branch.IsActive = !branch.IsActive;
-                    _context.Branches.Update(branch);
-                    await _context.SaveChangesAsync();
+                    return BaseResponse.CreateResponse("Branch not found.", HttpStatusCode.NotFound);
                 }
 
-                response = new BaseResponse
+                branch.IsActive = !branch.IsActive;
+                _context.Branches.Update(branch);
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = new { message = $"Branch status updated to {(branch.IsActive ? "Active" : "Inactive")}." }
                 };
-
-                return response;
-
             }
             catch (Exception ex)
             {
-                logger.LogError("Branch status update failed: " + ex.Message);
-                response = new BaseResponse
+                logger.LogError(ex, "Error occurred while updating branch status.");
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new { message = "Branch status update failed." }
+                    Data = new { message = "An error occurred while updating branch status." }
                 };
-
-                return response;
             }
         }
 
@@ -268,14 +270,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                     }
                 }
 
-                // Delete related UserBranches records
                 var userBranchRecords = await _context.UserBranches
                     .Where(ub => branchIds.Contains(ub.Id))
                     .ToListAsync();
 
                 _context.UserBranches.RemoveRange(userBranchRecords);
-
                 _context.Branches.UpdateRange(branches);
+
                 await _context.SaveChangesAsync();
 
                 return new BaseResponse
@@ -286,14 +287,66 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
             }
             catch (Exception ex)
             {
-                logger.LogError("Bulk delete failed: " + ex.Message);
+                logger.LogError(ex, "Error occurred while deleting multiple branches.");
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new { message = "Bulk delete failed." }
+                    Data = new { message = "An error occurred while deleting branches." }
                 };
             }
         }
 
+        public async Task<BaseResponse> Filter(BranchFilterrequest request)
+        {
+            try
+            {
+                IQueryable<BranchModel> query = _context.Branches.Where(b => !b.IsDelete);
+
+                if (request.FromDate != null)
+                {
+                    var fromDate = request.FromDate.Value.Date;
+                    query = query.Where(sl => sl.CreatedAt >= fromDate);
+                }
+
+                if (request.ToDate != null)
+                {
+                    var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
+                    query = query.Where(sl => sl.CreatedAt <= toDate);
+                }
+
+                if (request.IsActive != "All")
+                {
+                    if (request.IsActive == "active")
+                        query = query.Where(sl => sl.IsActive);
+                    else if (request.IsActive == "inactive")
+                        query = query.Where(sl => !sl.IsActive);
+                }
+
+                var branchList = await query.Select(data => new BranchListDTO
+                {
+                    Id = data.Id,
+                    Name = data.Name,
+                    Address = data.Address,
+                    IsActive = data.IsActive,
+                    PhoneNumber = data.PhoneNumber,
+                    CreatedAt = data.CreatedAt
+                }).ToListAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = branchList
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while filtering branches.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while filtering branches." }
+                };
+            }
+        }
     }
 }

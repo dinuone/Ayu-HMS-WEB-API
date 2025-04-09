@@ -127,8 +127,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-                    Expires = DateTime.UtcNow.AddDays(7),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    Expires = DateTime.UtcNow.AddHours(3), // Set expiration to 3 hours
+                    SigningCredentials = new SigningCredentials(
+                          new SymmetricSecurityKey(key),
+                          SecurityAlgorithms.HmacSha256Signature
+                      )
                 };
                 return tokenHandler.CreateToken(tokenDescriptor);
             });
@@ -284,7 +287,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 };
             }
         }
-
 
         public async Task<BaseResponse> Delete(int id)
         {

@@ -74,6 +74,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             BaseResponse response = await _branchService.UpdateStatus(id);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
+
+        [Authorize]
+        [HttpPost("filter")]
+        public async Task<IActionResult> Filter(BranchFilterrequest request)
+        {
+            BaseResponse response = await _branchService.Filter(request);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
     }
-    
+
 }

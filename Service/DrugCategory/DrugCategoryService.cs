@@ -42,7 +42,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                 }
                DrugCategoryModel Drugcategory = new DrugCategoryModel
                {
-                   DrugCategory = request.DrugCategory,
+                   Name = request.DrugCategory,
                    Description = request.Description,
                    CreatedBy = loggedInUser,
                };
@@ -90,7 +90,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                     };
                     return response;
                 }
-                drugCategory.DrugCategory = request.DrugCategory;
+                drugCategory.Name = request.DrugCategory;
                 drugCategory.Description = request.Description;
                 drugCategory.IsActive = request.IsActive;
 

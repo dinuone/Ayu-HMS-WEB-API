@@ -45,7 +45,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
 
                 ClinicCategoryModel clinicCategory = new ClinicCategoryModel
                 {
-                    ClinicCategoryName = request.ClinicCategoryName,
+                    Name = request.ClinicCategoryName,
                     Description = request.Description,
                     DayOfTheWeek = request.DayOfTheWeek,
                     CreatedBy = loggedInUser,
@@ -135,7 +135,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     ClinicCategoryListMapp.Add(new ClinicCategoryListDTO
                     {
                         Id = clinicCategory.Id,
-                        ClinicCategoryName = clinicCategory.ClinicCategoryName,
+                        ClinicCategoryName = clinicCategory.Name,
                         Description = clinicCategory.Description,
                         DayOfTheWeek = clinicCategory.DayOfTheWeek,
                         CreatedBy = clinicCategory.CreatedBy,
@@ -224,7 +224,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     return response;
                 }
 
-                clinicCategory.ClinicCategoryName = request.ClinicCategoryName;
+                clinicCategory.Name = request.ClinicCategoryName;
                 clinicCategory.Description = request.Description;
                 clinicCategory.DayOfTheWeek = request.DayOfTheWeek;
 

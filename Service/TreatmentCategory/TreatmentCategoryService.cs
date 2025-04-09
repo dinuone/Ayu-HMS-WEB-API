@@ -124,7 +124,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 {
                     TreatmentCategoryListMapp.Add(new TreatmentCategoryListDTO {
                         Id = treatmentCategory.Id,
-                        TreatmentName = treatmentCategory.TreatmentName,
+                        TreatmentName = treatmentCategory.Name,
                         Description = treatmentCategory.Description,
                         CreatedBy = treatmentCategory.CreatedBy,
                         CreatedAt = treatmentCategory.CreatedAt,
@@ -217,7 +217,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
                 string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                treatmentCategory.TreatmentName = request.TreatmentName;
+                treatmentCategory.Name = request.TreatmentName;
                 treatmentCategory.Description = request.Description;
                 treatmentCategory.IsActive = request.IsActive;
                 treatmentCategory.UpdatedBy = updatedBy;
