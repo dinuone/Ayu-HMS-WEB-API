@@ -1,5 +1,6 @@
 ﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Branch;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Branch;
 
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,23 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _branchService.Delete(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpPost("delete-all")]
+        public async Task<IActionResult> DeleteAll(List<int> ids)
+        {
+            // Call the service to delete (soft delete) the user
+            BaseResponse response = await _branchService.DeleteAll(ids);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("update-status/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            BaseResponse response = await _branchService.UpdateStatus(id);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
     }

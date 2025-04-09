@@ -1,6 +1,8 @@
 ﻿using BookInventory.DTOs.Request.User;
 using Harendra_Ayurveda_HMS_WEB_API;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
@@ -62,9 +64,56 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 
         }
 
-        public async Task<UserModel?> GetById(int id)
+        public async Task<BaseResponse> GetById(int id)
         {
-            return await dBContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            BaseResponse response;
+            try
+            {
+                var user = await (from u in dBContext.Users
+                                  join r in dBContext.Roles on u.Role equals r.Id into roleGroup
+                                  from role in roleGroup.DefaultIfEmpty()
+                                  where u.IsDelete == false && u.Id == id
+                                  select new UserSelectedRecordDTO
+                                  {
+                                      Id = u.Id,
+                                      FirtstName = u.FirstName,
+                                      LastName = u.LastName,
+                                      Username = u.Username,
+                                      Email = u.Email,
+                                      Role = role != null ? new RoleDataDTO
+                                      {
+                                          Id = role.Id,
+                                          Name = role.Name
+                                      } : null,
+                                      Branches = new List<BranchDataDTO>()
+                                  }).FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    user.Branches = GetBranchList((int)user.Id, dBContext);
+                }
+
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = user
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation("Get user record for edit Exception :::::" + ex.Message);
+
+                return new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        message = ex.Message
+                    }
+                };
+            }
         }
 
         private async Task<string> generateJwtToken(UserModel user)
@@ -119,6 +168,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                     Password = hashedPassword,
                     Role = request.Role,
                     CreatedBy = createdBy,
+                    IsInitialPassword = true,
                   
                 };
 
@@ -155,10 +205,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
             }
         }
 
-        public async Task<BaseResponse> Update(int id, UserCreateRequest request)
+        public async Task<BaseResponse> Update(int id, UserUpdateRequest request)
         {
+            using var transaction = await dBContext.Database.BeginTransactionAsync();
+
             try
             {
+                // Get the user being updated
                 var user = await dBContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
                 if (user == null)
                 {
@@ -169,18 +222,50 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                     };
                 }
 
+                // Check if the new username is different from current username
+                if (user.Username != request.UserName)
+                {
+                    var usernameExists = await dBContext.Users
+                        .AnyAsync(u => u.Username == request.UserName && u.Id != id && !u.IsDelete);
+
+                    if (usernameExists)
+                    {
+                        return new BaseResponse
+                        {
+                            StatusCode = (int)HttpStatusCode.BadRequest,
+                            Data = new { message = "Username already exists for another user." }
+                        };
+                    }
+                }
+
                 string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
+                // Update user properties
                 user.Username = request.UserName;
                 user.Email = request.Email;
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
                 user.Role = request.Role;
-                user.IsActive = request.IsActive;
                 user.UpdatedBy = updatedBy;
 
                 dBContext.Users.Update(user);
                 await dBContext.SaveChangesAsync();
+
+                // Update UserBranches
+                var existingBranches = await dBContext.UserBranches.Where(ub => ub.UserId == id).ToListAsync();
+                dBContext.UserBranches.RemoveRange(existingBranches);
+                await dBContext.SaveChangesAsync();
+
+                var updatedUserBranches = request.Branches.Select(branchId => new UserBranchModel
+                {
+                    UserId = id,
+                    BranchId = (int)branchId
+                });
+
+                await dBContext.AddRangeAsync(updatedUserBranches);
+                await dBContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
 
                 return new BaseResponse
                 {
@@ -190,6 +275,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 logger.LogError("User update failed: " + ex.Message);
                 return new BaseResponse
                 {
@@ -198,6 +284,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 };
             }
         }
+
 
         public async Task<BaseResponse> Delete(int id)
         {
@@ -260,8 +347,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 foreach (var user in users)
                 {
                     user.IsDelete = true;
-                    user.UpdatedAt = DateTime.UtcNow;
                     user.UpdatedBy = deletedBy;
+
                 }
 
                 dBContext.Users.UpdateRange(users);
@@ -284,35 +371,30 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
             }
         }
 
-
-
         public async Task<BaseResponse>List()
         {
             BaseResponse response;
             try
             {
-                var users = dBContext.Users.ToList();
+                var userList = await (from u in dBContext.Users
+                                      join r in dBContext.Roles on u.Role equals r.Id into roleGroup
+                                      from role in roleGroup.DefaultIfEmpty() where u.IsDelete == false
+                                      select new UserListDTO
+                                      {
+                                          Id = u.Id,
+                                          FirtstName = u.FirstName,
+                                          LastName = u.LastName,
+                                          Username = u.Username,
+                                          Email = u.Email,
+                                          Role = role != null ? role.Name : null,
+                                          IsActive = u.IsActive,
+                                          Branches = new List<BranchDataDTO>(),
+                                          CreatedAt = u.CreatedAt
+                                      }).ToListAsync();
 
-                // Create a list to hold the DTOs
-                List<UserListDTO> userList = [];
-
-                foreach (var user in users)
+                foreach (var user in userList)
                 {
-                  
-                    // Map user to UserListDTO
-                    var userDto = new UserListDTO
-                    {
-                        Id = user.Id,
-                        Username = user.Username,
-                        Email = user.Email,
-                        Role = user.Role,
-                        IsActive = user.IsActive,
-                        FirtstName = user.FirstName,
-                        LastName = user.LastName,
-                        CreatedAt = user.CreatedAt
-                    };
-
-                    userList.Add(userDto);
+                    user.Branches = GetBranchList(user.Id, dBContext);
                 }
 
                 response = new BaseResponse()
@@ -337,6 +419,135 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 
                 logger.LogInformation("User List Exception :::::" + ex.Message);
 
+                return response;
+            }
+        }
+
+        public static List<BranchDataDTO> GetBranchList(long userId, ApplicationDBContext context)
+        {
+
+            List<BranchDataDTO> result = (from ub in context.UserBranches
+                          join b in context.Branches on ub.BranchId equals b.Id
+                          where ub.UserId == userId
+                          select new BranchDataDTO
+                          {
+                              Id = b.Id,
+                              Name = b.Name
+                          }).ToList();
+
+            return result;
+        }
+
+        //TODO
+        public Task<BaseResponse> ChangePassword(ChangePasswordRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<BaseResponse> GetRoleList()
+        {
+            BaseResponse response;
+            try
+            {
+                List<RoleModel> roles = await dBContext.Roles.Where(r => r.Name != "SuperAdmin").ToListAsync();
+
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = roles
+                };
+
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        message = ex.Message
+                    }
+                };
+
+                logger.LogInformation("Role List Exception :::::" + ex.Message);
+
+                return response;
+            }
+        }
+
+        public async Task<BaseResponse> UpdateStatus(int id)
+        {
+            BaseResponse response;
+            try
+            {
+                UserModel? user = await dBContext.Users.Where(u => u.IsDelete == false && u.Id == id).FirstOrDefaultAsync();
+                
+                if(user != null)
+                {
+                    user.IsActive = !user.IsActive;
+                    dBContext.Users.Update(user);
+                    await dBContext.SaveChangesAsync();
+                }
+
+                response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"User status updated to {(user.IsActive ? "Active" : "Inactive")}." }
+                };
+
+                return response;
+
+            }
+            catch(Exception ex)
+            {
+                logger.LogError("User status update failed: " + ex.Message);
+                response =  new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "User status update failed." }
+                };
+
+                return response;
+            }
+        }
+
+        public  async Task<BaseResponse> GetBranchList()
+        {
+            BaseResponse response;
+            try
+            {
+                List<BranchModel> branches = await dBContext.Branches.Where(b => b.IsDelete == false && b.IsActive == true).ToListAsync();
+
+                List<BranchDataDTO> BranchListMapp = new List<BranchDataDTO>();
+                foreach (var branch in branches)
+                {
+                    BranchListMapp.Add(new BranchDataDTO
+                    {
+                        Id = branch.Id,
+                        Name = branch.Name,
+                    });
+                }
+
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = BranchListMapp
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        message = ex.Message
+                    }
+                };
                 return response;
             }
         }

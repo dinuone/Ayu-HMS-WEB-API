@@ -1,4 +1,5 @@
-﻿using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -48,18 +49,24 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Middleware
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 // Attach user to HttpContext.User
-                var user = await userService.GetById(userId);
-                var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim("id", user.Id.ToString())
-                // Add more claims as necessary
-            };
+                var response = await userService.GetById(userId);
+                var userDto = response.Data as UserSelectedRecordDTO;
+                if (userDto != null)
+                {
+                   var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, userDto.Username),
+                        new Claim("id", userDto.Id.ToString())
+                        // Add more claims as necessary
+                    };
 
-                var identity = new ClaimsIdentity(claims, "Bearer");
-                var principal = new ClaimsPrincipal(identity);
+                    var identity = new ClaimsIdentity(claims, "Bearer");
+                    var principal = new ClaimsPrincipal(identity);
 
-                context.User = principal; // Set HttpContext.User
+                    context.User = principal;
+
+                    context.User = principal; // Set HttpContext.User
+                }
             }
             catch
             {

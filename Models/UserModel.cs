@@ -26,7 +26,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         public string Password { get; set; }
 
         [Column("role")]
-        public string Role { get; set; }
+        public long Role { get; set; }
+
+        [Column("is_initial_password")]
+        public bool IsInitialPassword { get; set; }
 
 
     }

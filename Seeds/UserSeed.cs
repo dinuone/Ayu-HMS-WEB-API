@@ -19,29 +19,18 @@ namespace BookInventory.Seeds
 
                 var users = new List<UserModel>
                 {
-                    new UserModel
+                   new UserModel
                     {
-                        Username ="admin",
+                        Username = "admin",
                         Password = hashPassword,
                         Email = "admin@gmail.com",
-                        Role = "Admin",
+                        Role = 1,
                         IsActive = true,
                         FirstName = "super",
                         LastName = "admin",
                         CreatedBy = "system"
                     },
 
-                    new UserModel
-                    {
-                        Username ="user123",
-                        Password = hashPassword,
-                        Email = "user@gmail.com",
-                        Role = "Cashier",
-                        IsActive = true,
-                        FirstName = "test",
-                        LastName = "user",
-                        CreatedBy = "system"
-                    },
                  };
 
 

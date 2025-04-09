@@ -1,4 +1,4 @@
-﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -38,10 +38,26 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        [Authorize]
+        [HttpGet("get/{id}")]
+        public async Task<IActionResult> GetRecordFoEdit(int id)
+        {
+            BaseResponse response = await userService.GetById(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("update-status/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            BaseResponse response = await userService.UpdateStatus(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
         // Update User
         [Authorize]
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update(int id, UserCreateRequest request)
+        public async Task<IActionResult> Update(int id, UserUpdateRequest request)
         {
             // Call the service to update the user details
             BaseResponse response = await userService.Update(id, request);
@@ -58,7 +74,31 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        // Delete User (Soft Delete)
+        [Authorize]
+        [HttpPost("delete-all")]
+        public async Task<IActionResult> DeleteAll(List<int> ids)
+        {
+            // Call the service to delete (soft delete) the user
+            BaseResponse response = await userService.DeleteAll(ids);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
 
+        [Authorize]
+        [HttpGet("role-list")]
+        public async Task<IActionResult> RoleList()
+        {
+            BaseResponse response = await userService.GetRoleList();
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("branch-list")]
+        public async Task<IActionResult> BranchList()
+        {
+            BaseResponse response = await userService.GetBranchList();
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
 
     }
 }
