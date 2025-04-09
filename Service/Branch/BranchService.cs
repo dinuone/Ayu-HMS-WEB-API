@@ -6,6 +6,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
 using System.Security.Claims;
+using System.Linq;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 {
@@ -89,7 +90,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
                 if (branch == null)
                 {
-
                     response = new BaseResponse()
                     {
                         StatusCode = (int)HttpStatusCode.BadRequest,
@@ -102,14 +102,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                     return response;
                 }
 
+                // Manual mapping
+                var dto = new BranchListDTO
+                {
+                    Id = branch.Id,
+                    Name = branch.Name,
+                    PhoneNumber = branch.PhoneNumber,
+                    Address = branch.Address
+                };
+
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = branch
+                    Data = dto
                 };
 
                 return response;
-
             }
             catch (Exception ex)
             {
@@ -126,6 +134,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
             }
         }
 
+
         public async Task<BaseResponse> GetAll()
         {
             BaseResponse response;
@@ -140,6 +149,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                     {
                         Id = branch.Id,
                         Name = branch.Name,
+                        PhoneNumber = branch.PhoneNumber,
+                        Address = branch.Address,
                         CreatedAt = branch.CreatedAt,
                         CreatedBy = branch.CreatedBy,
                         IsActive = branch.IsActive
@@ -171,15 +182,118 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
         public async Task<BaseResponse> Delete(int id)
         {
             BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
-            if (branch == null)
+
+            if (branch == null || branch.IsDelete)
             {
                 return BaseResponse.CreateResponse("Branch not found", HttpStatusCode.NotFound);
             }
 
+            // Soft-delete the branch
             branch.IsDelete = true;
+
+            // Delete related UserBranches
+            var userBranches = await _context.UserBranches
+                .Where(ub => ub.BranchId == id)
+                .ToListAsync();
+
+            _context.UserBranches.RemoveRange(userBranches); // Or soft-delete if required
+
             await _context.SaveChangesAsync();
 
-            return BaseResponse.CreateResponse("Branch deleted", HttpStatusCode.OK);
+            return BaseResponse.CreateResponse("Branch deleted successfully", HttpStatusCode.OK);
         }
+
+
+        public async Task<BaseResponse> UpdateStatus(int id)
+        {
+            BaseResponse response;
+            try
+            {
+                BranchModel? branch = await _context.Branches.Where(u => u.IsDelete == false && u.Id == id).FirstOrDefaultAsync();
+
+                if (branch != null)
+                {
+                    branch.IsActive = !branch.IsActive;
+                    _context.Branches.Update(branch);
+                    await _context.SaveChangesAsync();
+                }
+
+                response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"Branch status updated to {(branch.IsActive ? "Active" : "Inactive")}." }
+                };
+
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Branch status update failed: " + ex.Message);
+                response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "Branch status update failed." }
+                };
+
+                return response;
+            }
+        }
+
+        public async Task<BaseResponse> DeleteAll(List<int> branchIds)
+        {
+            try
+            {
+                var branches = await _context.Branches
+                    .Where(b => branchIds.Contains(b.Id) && !b.IsDelete)
+                    .ToListAsync();
+
+                if (!branches.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "No valid branches found to delete." }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var branch in branches)
+                {
+                    if (branch.Id != 1)
+                    {
+                        branch.IsDelete = true;
+                        branch.UpdatedBy = deletedBy;
+                    }
+                }
+
+                // Delete related UserBranches records
+                var userBranchRecords = await _context.UserBranches
+                    .Where(ub => branchIds.Contains(ub.Id))
+                    .ToListAsync();
+
+                _context.UserBranches.RemoveRange(userBranchRecords);
+
+                _context.Branches.UpdateRange(branches);
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Branches deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Bulk delete failed: " + ex.Message);
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "Bulk delete failed." }
+                };
+            }
+        }
+
     }
 }
