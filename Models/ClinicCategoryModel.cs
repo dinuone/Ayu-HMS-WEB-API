@@ -12,7 +12,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         public int Id { get; set; }
         [Required]
         [Column("name", TypeName = "varchar(128)")]
-        public string ClinicCategoryName { get; set; }
+        public string Name { get; set; }
 
         [Column("dayOfTheWeek", TypeName = "varchar(128)")]
         public string DayOfTheWeek { get; set; }

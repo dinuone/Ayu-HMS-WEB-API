@@ -13,7 +13,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         public int Id { get; set; }
 
         [Column("name")]
-        public required string TreatmentName { get; set; }
+        public required string Name { get; set; }
 
         [Column("price")]
         public decimal TreatmentPrice { get; set; }

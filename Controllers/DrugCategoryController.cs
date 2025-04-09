@@ -5,7 +5,7 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DrugCategoryRequest;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
-    [Route("api/drugcategory")]
+    [Route("api/drug-category")]
     [ApiController]
     public class DrugCategoryController : Controller
     {

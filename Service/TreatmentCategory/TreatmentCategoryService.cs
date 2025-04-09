@@ -30,25 +30,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
             try
             {
-                var loggedInUser = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
-                if (loggedInUser == null)
-                {
-                    response = new BaseResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.Unauthorized,
-                        Data = new
-                        {
-                            message = "User not logged in"
-                        }
-                    };
-                    return response;
-                    
-                }
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+               
                 TreatmentCategoryModel treatmentCategory = new TreatmentCategoryModel
                 {
-                    TreatmentName = request.TreatmentName,
+                    Name = request.TreatmentName,
                     Description = request.Description,
-                    CreatedBy = loggedInUser,
+                    CreatedBy = createdBy,
                 };
                 _context.Set<TreatmentCategoryModel>().Add(treatmentCategory);
                 await _context.SaveChangesAsync();
@@ -226,9 +214,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                     
 
                 }
+
+                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
                 treatmentCategory.TreatmentName = request.TreatmentName;
                 treatmentCategory.Description = request.Description;
-                treatmentCategory.IsActive = request.IsActive;  
+                treatmentCategory.IsActive = request.IsActive;
+                treatmentCategory.UpdatedBy = updatedBy;
 
                 _context.Set<TreatmentCategoryModel>().Update(treatmentCategory);
                 await _context.SaveChangesAsync();

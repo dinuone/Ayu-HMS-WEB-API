@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
-    [Route("api/cliniccategory")]
+    [Route("api/clinic-category")]
     [ApiController]
     public class ClinicCategoryController : Controller
     {

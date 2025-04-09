@@ -50,7 +50,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                 await _context.SaveChangesAsync();
                 response = new BaseResponse()
                 {
-                    StatusCode = (int)HttpStatusCode.Created,
+                    StatusCode = (int)HttpStatusCode.OK,
                     Data = new { message = "Drug Category has been successfully created" }
                 };
                 return response;

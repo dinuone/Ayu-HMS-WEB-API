@@ -11,8 +11,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("id")]
         public int Id { get; set; }
         [Required]
-        [Column("Drugcategory", TypeName = "varchar(128)")]
-        public string DrugCategory { get; set; }
+        [Column("name", TypeName = "varchar(128)")]
+        public string Name { get; set; }
 
         [Column ("description", TypeName ="varchar(256)")]
         public string Description { get; set; }
