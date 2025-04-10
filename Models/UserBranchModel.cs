@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("user_branches")]
     public class UserBranchModel
     {
         [Key]

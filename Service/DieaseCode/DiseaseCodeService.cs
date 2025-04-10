@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Security.Claims;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DiseaseCodeRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -27,33 +30,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             BaseResponse response;
             try
             {
-                var loggedInUser = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
-                if (loggedInUser == null) 
-                {
-                    response = new BaseResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.Unauthorized,
-                        Data = new
-                        {
-                            message = "User not logged in"
-                        }
-                    };
-                    return response;
-                }
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
                 DiseaseCodeModel DiseaseCode = new DiseaseCodeModel
                 {
                     DiseaseCode = request.DiseaseCode,
                     DiseaseName = request.DiseaseName,
                     Description = request.Description,
-                    CreatedBy = loggedInUser,
+                    CreatedBy = createdBy,
                 };
                 _context.Set<DiseaseCodeModel>().Add(DiseaseCode);
                 await _context.SaveChangesAsync();
 
                 response = new BaseResponse()
                 {
-                    StatusCode = (int)HttpStatusCode.Created,
-                    Data = new {message = "Disease Code has been succefully created"}
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new {message = "Disease Code created successfully." }
                 };
                 return response;
             }
@@ -135,14 +127,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 {
                     DiseaseCodeListMapp.Add(new DiseaseCodeListDTO
                     {
-                        DiseaseCodeId = DiseaseCode.Id,
+                        Id = DiseaseCode.Id,
                         DiseaseCode = DiseaseCode.DiseaseCode,
                         DiseaseName = DiseaseCode.DiseaseName,
                         Description = DiseaseCode.Description,
+                        IsActive = DiseaseCode.IsActive,
                         CreatedBy = DiseaseCode.CreatedBy,
                         CreatedAt = DiseaseCode.CreatedAt
-
-
                     });
 
                 }
@@ -187,10 +178,18 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                     return response;
                 }
 
+                var diseaseCodeDto = new DiseaseCodeDataDTO
+                {
+                    Id = DiseaseCode.Id,
+                    DiseaseName = DiseaseCode.DiseaseName,
+                    DiseaseCode = DiseaseCode.DiseaseCode,
+                    Description = DiseaseCode.Description
+                };
+
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = DiseaseCode
+                    Data = diseaseCodeDto
                 };
                 return response;
             }
@@ -227,10 +226,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                     };
                     return response;
                 }
+
+                string? updateBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
                 DiseaseCode.DiseaseCode = request.DiseaseCode;
                 DiseaseCode.DiseaseName = request.DiseaseName;
                 DiseaseCode.Description = request.Description;
-                DiseaseCode.IsActive = request.IsActive;
+                DiseaseCode.UpdatedBy = updateBy;
 
                 _context.Set<DiseaseCodeModel>().Update(DiseaseCode);
                 await _context.SaveChangesAsync();
@@ -238,7 +240,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data =  new {message  = "Disease code has been updated"}
+                    Data =  new {message  = "Disease Code updated successfully" }
                 };
             }
             catch (Exception ex)
@@ -254,6 +256,144 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
                 logger.LogError(ex, "Error occurred while updating clinic category");
             }
             return response;
+        }
+
+        public async Task<BaseResponse> UpdateStatus(int id)
+        {
+            BaseResponse response;
+            try
+            {
+                var diseaseCode = await _context.DiseaseCodes.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+
+                if (diseaseCode == null)
+                {
+                    response = new BaseResponse()
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new
+                        {
+                            message = "Disease code not found"
+                        }
+                    };
+                    return response;
+                }
+
+                diseaseCode.IsActive = !diseaseCode.IsActive;
+                _context.DiseaseCodes.Update(diseaseCode);
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"Disease Code status updated to {(diseaseCode.IsActive ? "Active" : "Inactive")}." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating Disease Code status.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while updating Disease Code status." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DeleteAll(List<int> DrugCtgIds)
+        {
+            try
+            {
+                var drugCategories = await _context.drugcategories
+                    .Where(b => DrugCtgIds.Contains(b.Id) && !b.IsDelete)
+                    .ToListAsync();
+
+                if (!drugCategories.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "No valid Disease Code found to delete." }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var drugCtg in drugCategories)
+                {
+                    drugCtg.IsDelete = true;
+                    drugCtg.UpdatedBy = deletedBy;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Disease Code deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while deleting multiple Disease Codes.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while deleting Disease Codes." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> Filter(FilterRequest request)
+        {
+            try
+            {
+                IQueryable<DiseaseCodeModel> query = _context.DiseaseCodes.Where(b => !b.IsDelete);
+
+                if (request.FromDate != null)
+                {
+                    var fromDate = request.FromDate.Value.Date;
+                    query = query.Where(sl => sl.CreatedAt >= fromDate);
+                }
+
+                if (request.ToDate != null)
+                {
+                    var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
+                    query = query.Where(sl => sl.CreatedAt <= toDate);
+                }
+
+                if (request.IsActive != "All")
+                {
+                    if (request.IsActive == "active")
+                        query = query.Where(sl => sl.IsActive);
+                    else if (request.IsActive == "inactive")
+                        query = query.Where(sl => !sl.IsActive);
+                }
+
+                var diseaseCodeLists = await query.Select(data => new DiseaseCodeListDTO
+                {
+                    Id = data.Id,
+                    DiseaseCode = data.DiseaseCode,
+                    DiseaseName = data.DiseaseName,
+                    Description = data.Description,
+                    IsActive = data.IsActive,
+                    CreatedAt = data.CreatedAt
+                }).ToListAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = diseaseCodeLists
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while filtering Disease Code.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while filtering Disease Code." }
+                };
+            }
         }
     }
 }

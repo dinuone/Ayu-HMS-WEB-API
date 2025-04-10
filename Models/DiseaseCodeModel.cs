@@ -4,6 +4,7 @@ using BookInventory.Models;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("disease_codes")]
     public class DiseaseCodeModel : BaseEntity
     {
         [Key]
@@ -11,14 +12,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("Diseasecode", TypeName = "varchar(128)")]
-        public string DiseaseCode { get; set; }
-        [Required]
-        [Column("Diseasename", TypeName = "varchar(128)")]
-        public string DiseaseName { get; set; }
+        [Column("disease_code", TypeName = "varchar(128)")]
+        public required string DiseaseCode { get; set; }
+       
+        [Column("disease_name", TypeName = "varchar(128)")]
+        public required string DiseaseName { get; set; }
+        
         [Column("description", TypeName = "varchar(256)")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
     }
 }

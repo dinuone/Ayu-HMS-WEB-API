@@ -2,6 +2,7 @@
 using Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DrugCategoryRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
@@ -53,6 +54,31 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var response = await drugCategoryService.Delete(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpPost("delete-all")]
+        public async Task<IActionResult> DeleteAll(List<int> ids)
+        {
+            // Call the service to delete (soft delete) 
+            BaseResponse response = await drugCategoryService.DeleteAll(ids);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("update-status/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            BaseResponse response = await drugCategoryService.UpdateStatus(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpPost("filter")]
+        public async Task<IActionResult> Filter(FilterRequest request)
+        {
+            BaseResponse response = await drugCategoryService.Filter(request);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 

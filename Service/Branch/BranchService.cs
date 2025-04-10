@@ -8,6 +8,7 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
 using System.Security.Claims;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 {
@@ -30,19 +31,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
         {
             try
             {
-                var loggedInUser = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
-
-                if (loggedInUser == null)
-                {
-                    return BaseResponse.CreateResponse("User is not logged in.", HttpStatusCode.Unauthorized);
-                }
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
                 BranchModel branch = new BranchModel
                 {
                     Name = request.Name,
                     Address = request.Address,
                     PhoneNumber = request.PhoneNumber,
-                    CreatedBy = loggedInUser,
+                    CreatedBy = createdBy,
                 };
 
                 _context.Set<BranchModel>().Add(branch);
@@ -69,6 +65,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
         {
             try
             {
+                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
                 BranchModel? branch = await _context.Set<BranchModel>().FindAsync(id);
                 if (branch == null)
                 {
@@ -78,6 +76,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 branch.Name = request.Name;
                 branch.Address = request.Address;
                 branch.PhoneNumber = request.PhoneNumber;
+                branch.UpdatedBy = updatedBy;
 
                 _context.Set<BranchModel>().Update(branch);
                 await _context.SaveChangesAsync();
@@ -113,7 +112,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                     };
                 }
 
-                var dto = new BranchListDTO
+                var branchDataDTO = new BranchListDTO
                 {
                     Id = branch.Id,
                     Name = branch.Name,
@@ -124,7 +123,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = dto
+                    Data = branchDataDTO
                 };
             }
             catch (Exception ex)
@@ -263,11 +262,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
 
                 foreach (var branch in branches)
                 {
-                    if (branch.Id != 1)
-                    {
-                        branch.IsDelete = true;
-                        branch.UpdatedBy = deletedBy;
-                    }
+                    branch.IsDelete = true;
+                    branch.UpdatedBy = deletedBy;
                 }
 
                 var userBranchRecords = await _context.UserBranches
@@ -296,7 +292,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Branch
             }
         }
 
-        public async Task<BaseResponse> Filter(BranchFilterrequest request)
+        public async Task<BaseResponse> Filter(FilterRequest request)
         {
             try
             {

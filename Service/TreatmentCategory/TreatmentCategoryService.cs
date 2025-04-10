@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Security.Claims; // Add this line
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.TreatmentCategory;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
@@ -43,7 +45,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.Created,
-                    Data = new { message = "Treatment category has been successfully created" }
+                    Data = new { message = "Treatment category created successfully" }
                 };  
                 return response;
             }
@@ -127,6 +129,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                         TreatmentName = treatmentCategory.Name,
                         Description = treatmentCategory.Description,
                         CreatedBy = treatmentCategory.CreatedBy,
+                        IsActive = treatmentCategory.IsActive,
                         CreatedAt = treatmentCategory.CreatedAt,
                         
                     });
@@ -173,10 +176,18 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                     };
                     return response;
                 }
+
+                TreatmentCategoryDataDTO treatmentCategoryData = new TreatmentCategoryDataDTO()
+                {
+                    Id = treatmentCategory.Id,
+                    TreatmentName = treatmentCategory.Name,
+                    Description = treatmentCategory.Description
+                };
+
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = treatmentCategory
+                    Data = treatmentCategoryData
                 };
             }
             catch (Exception ex)
@@ -219,7 +230,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
                 treatmentCategory.Name = request.TreatmentName;
                 treatmentCategory.Description = request.Description;
-                treatmentCategory.IsActive = request.IsActive;
                 treatmentCategory.UpdatedBy = updatedBy;
 
                 _context.Set<TreatmentCategoryModel>().Update(treatmentCategory);
@@ -227,7 +237,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = new { message = "Treatment category has been updated" }
+                    Data = new { message = "Treatment category updated successfully" }
                 };
                 return response;
 
@@ -247,6 +257,143 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 
             }
             return response;
+        }
+
+        public async Task<BaseResponse> UpdateStatus(int id)
+        {
+            BaseResponse response;
+            try
+            {
+                var treatmentCategory = await _context.TreatmentCategories.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+
+                if (treatmentCategory == null)
+                {
+                    response = new BaseResponse()
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new
+                        {
+                            message = "Treatment Category not found"
+                        }
+                    };
+                    return response;
+                }
+
+                treatmentCategory.IsActive = !treatmentCategory.IsActive;
+                _context.TreatmentCategories.Update(treatmentCategory);
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"Treatment Category status updated to {(treatmentCategory.IsActive ? "Active" : "Inactive")}." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating Treatment Category status.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while updating Treatment Category status." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DeleteAll(List<int> treatmentCtgIds)
+        {
+            try
+            {
+                var drugCategories = await _context.TreatmentCategories
+                    .Where(b => treatmentCtgIds.Contains(b.Id) && !b.IsDelete)
+                    .ToListAsync();
+
+                if (!drugCategories.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new { message = "No valid Treatment Category found to delete." }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var drugCtg in drugCategories)
+                {
+                    drugCtg.IsDelete = true;
+                    drugCtg.UpdatedBy = deletedBy;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Treatment Categories deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while deleting multiple Treatment Category.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while deleting Treatment Category." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> Filter(FilterRequest request)
+        {
+            try
+            {
+                IQueryable<TreatmentCategoryModel> query = _context.TreatmentCategories.Where(b => !b.IsDelete);
+
+                if (request.FromDate != null)
+                {
+                    var fromDate = request.FromDate.Value.Date;
+                    query = query.Where(sl => sl.CreatedAt >= fromDate);
+                }
+
+                if (request.ToDate != null)
+                {
+                    var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
+                    query = query.Where(sl => sl.CreatedAt <= toDate);
+                }
+
+                if (request.IsActive != "All")
+                {
+                    if (request.IsActive == "active")
+                        query = query.Where(sl => sl.IsActive);
+                    else if (request.IsActive == "inactive")
+                        query = query.Where(sl => !sl.IsActive);
+                }
+
+                var treatmentCategoryList = await query.Select(data => new TreatmentCategoryListDTO
+                {
+                    Id = data.Id,
+                    TreatmentName = data.Name,
+                    Description = data.Description,
+                    IsActive = data.IsActive,
+                    CreatedAt = data.CreatedAt
+                }).ToListAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = treatmentCategoryList
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while filtering Treatment Category.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while filtering Treatment Category." }
+                };
+            }
         }
     }
     

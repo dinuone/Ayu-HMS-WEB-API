@@ -4,6 +4,7 @@ using BookInventory.Models;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("users")]
     public class UserModel : BaseEntity
     {
         [Key]

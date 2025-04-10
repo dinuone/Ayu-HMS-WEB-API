@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Branch
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest
 {
-    public class BranchFilterrequest
+    public class FilterRequest
     {
         [JsonPropertyName("from_date")]
         public DateTime? FromDate { get; set; }
@@ -11,6 +11,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Branch
         public DateTime? ToDate { get; set; }
 
         [JsonPropertyName("is_active")]
-        public string IsActive { get; set; }  
+        public string IsActive { get; set; }
     }
 }

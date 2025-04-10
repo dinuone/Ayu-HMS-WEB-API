@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("role")]
     public class RoleModel
     {
         [Key]

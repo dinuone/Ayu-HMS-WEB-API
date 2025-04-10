@@ -4,6 +4,7 @@ using BookInventory.Models;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("clinic_category")]
     public class ClinicCategoryModel : BaseEntity
     {
         [Key]
@@ -14,7 +15,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("name", TypeName = "varchar(128)")]
         public string Name { get; set; }
 
-        [Column("dayOfTheWeek", TypeName = "varchar(128)")]
+        [Column("days_of_Week", TypeName = "varchar(128)")]
         public string DayOfTheWeek { get; set; }
 
         [Column("description", TypeName = "varchar(256)")]
