@@ -19,17 +19,137 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
             localTimeZone = TimeZoneInfo.Local;
             this.httpContextAccessor = httpContextAccessor;
         }
-        public Task<BaseResponse> Create(TreatmentCreateRequest request)
+        public async Task<BaseResponse> Create(TreatmentCreateRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                var categoryExists = await _context.TreatmentCategories.AnyAsync(c => c.Id == request.TreatmentCategoryId);
+                if (!categoryExists)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new { message = "Invalid TreatmentCategoryId" }
+                    };
+                }
+
+               
+                TreatmentModel treatment = new TreatmentModel
+                {
+                    Name = request.TreatmentName,
+                    TreatmentPrice = request.TreatmentPrice,
+                    TreatmentCategoryId = request.TreatmentCategoryId,
+                    CreatedBy = createdBy,
+                    IsActive = true,
+                };
+
+              
+                await _context.Treatments.AddAsync(treatment);
+                await _context.SaveChangesAsync();
+
+                
+                var response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.Created,
+                    Data = new { message = "Treatment created successfully", treatment.Id }
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while creating a treatment");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
         }
-        public Task<BaseResponse> Update(int id, TreatmentCreateRequest request)
+        public async Task<BaseResponse> Update(int id, TreatmentCreateRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                TreatmentModel? treatment = await _context.Set<TreatmentModel>().FindAsync(id);
+                if (treatmentModel == null) 
+                {
+                    var response = new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "Treatment not found" }
+                    };
+                    return response;
+
+                }
+                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+                treatment.Name = request.TreatmentName;
+                treatment.TreatmentPrice = request.TreatmentPrice;
+                treatment.TreatmentCategoryId = request.TreatmentCategoryId;
+                treatment.UpdatedBy = updatedBy;
+                treatment.UpdatedAt = DateTime.UtcNow;
+                treatment.IsActive = request.IsActive;
+
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
-        public Task<BaseResponse> GetById(int id)
+        public async Task<BaseResponse> GetById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+               
+                var treatment = await _context.Treatments
+                    .Where(t => t.Id == id && t.IsDelete == false)
+                    .Join(
+                        _context.TreatmentCategories,
+                        treatment => treatment.TreatmentCategoryId,
+                        category => category.Id,
+                        (treatment, category) => new
+                        {
+                            treatment.Id,
+                            treatment.Name,
+                            treatment.TreatmentPrice,
+                            treatment.CreatedBy,
+                            treatment.CreatedAt,
+                            treatment.IsActive,
+                            CategoryName = category.Name,
+                        }
+                    )
+                    .FirstOrDefaultAsync();
+
+                if (treatment == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "Treatment not found" }
+                    };
+                }
+
+                
+                var response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = treatment
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while retrieving the treatment by ID");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
         }
         public async Task<BaseResponse> GetAll()
         {
