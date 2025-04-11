@@ -13,6 +13,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
         Task<BaseResponse> Delete(int id);
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> ClinicCtgIds);
-        Task<BaseResponse> Filter(FilterRequest request);
+        Task<BaseResponse> Filter(FilterRequestClinic request);
     }
 }

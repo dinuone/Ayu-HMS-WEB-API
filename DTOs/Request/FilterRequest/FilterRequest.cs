@@ -13,4 +13,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest
         [JsonPropertyName("is_active")]
         public string IsActive { get; set; }
     }
+
+    public class FilterRequestClinic : FilterRequest
+    {
+        [JsonPropertyName("available_days")]
+        public List<string>? AvailableDays { get; set; }
+    }
 }

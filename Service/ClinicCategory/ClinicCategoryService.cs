@@ -1,9 +1,12 @@
 ﻿using System.Net;
 using System.Security.Claims;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.ClinicCategory;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -45,9 +48,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
 
                 ClinicCategoryModel clinicCategory = new ClinicCategoryModel
                 {
-                    Name = request.ClinicCategoryName,
+                    Name = request.Name,
                     Description = request.Description,
-                    DayOfTheWeek = request.DayOfTheWeek,
+                    AvailableDays = request.AvailableDays,
                     CreatedBy = loggedInUser,
                 };
 
@@ -137,7 +140,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                         Id = clinicCategory.Id,
                         ClinicCategoryName = clinicCategory.Name,
                         Description = clinicCategory.Description,
-                        DayOfTheWeek = clinicCategory.DayOfTheWeek,
+                        AvailableDays = clinicCategory.AvailableDays.Split(','),
+                        IsActive = clinicCategory.IsActive,
                         CreatedBy = clinicCategory.CreatedBy,
                         CreatedAt = clinicCategory.CreatedAt,
                     });
@@ -182,11 +186,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     };
                     return response;
                 }
+
+                ClinicCategoryDataDTO clinicCategoryDto = new ClinicCategoryDataDTO()
+                {
+                    Id = clinicCategory.Id,
+                    AvailableDays = clinicCategory.AvailableDays.Split(','),
+                    ClinicCategoryName = clinicCategory.Name,
+                    Description = clinicCategory.Description
+                };
+
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = clinicCategory
+                    Data = clinicCategoryDto
                 };
+
+                return response;
             }
             catch (Exception ex)
             {
@@ -200,9 +215,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     }
                 };
                 logger.LogError(ex, "Error occurred while getting Clinic category by id");
-                
+                return response;
             }
-            return response;
+          
         }
 
         public async Task<BaseResponse> Update(int id, AddClinicCategoryRequest request)
@@ -224,9 +239,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     return response;
                 }
 
-                clinicCategory.Name = request.ClinicCategoryName;
+                clinicCategory.Name = request.Name;
                 clinicCategory.Description = request.Description;
-                clinicCategory.DayOfTheWeek = request.DayOfTheWeek;
+                clinicCategory.AvailableDays = request.AvailableDays;
 
                 _context.Set<ClinicCategoryModel>().Update(clinicCategory);
                 await _context.SaveChangesAsync();
@@ -253,5 +268,162 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
             }
             return response;
         }
+
+        public async Task<BaseResponse> UpdateStatus(int id)
+        {
+            BaseResponse response;
+            try
+            {
+                var clinicCategory = await _context.ClinicCategories.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+
+                if (clinicCategory == null)
+                {
+                    response = new BaseResponse()
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new
+                        {
+                            message = "Clinic Category not found"
+                        }
+                    };
+                    return response;
+                }
+
+                clinicCategory.IsActive = !clinicCategory.IsActive;
+                _context.ClinicCategories.Update(clinicCategory);
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"Clinic Category status updated to {(clinicCategory.IsActive ? "Active" : "Inactive")}." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating Clinic Category status.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while updating Clinic Category status." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DeleteAll(List<int> ClinicCtgIds)
+        {
+            try
+            {
+                var clinicCategories = await _context.ClinicCategories
+                    .Where(b => ClinicCtgIds.Contains(b.Id) && !b.IsDelete)
+                    .ToListAsync();
+
+                if (!clinicCategories.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "No valid Clinic Category found to delete." }
+                    };
+                }
+
+                string? deletedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var clinic in clinicCategories)
+                {
+                    clinic.IsDelete = true;
+                    clinic.UpdatedBy = deletedBy;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Clinic Category deleted successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while deleting multiple Disease Codes.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while deleting Disease Codes." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> Filter(FilterRequestClinic request)
+        {
+            try
+            {
+                IQueryable<ClinicCategoryModel> query = _context.ClinicCategories.Where(c => !c.IsDelete);
+
+                if (request.FromDate != null)
+                {
+                    var fromDate = request.FromDate.Value.Date;
+                    query = query.Where(c => c.CreatedAt >= fromDate);
+                }
+
+                if (request.ToDate != null)
+                {
+                    var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
+                    query = query.Where(c => c.CreatedAt <= toDate);
+                }
+
+                if (request.IsActive != "All")
+                {
+                    if (request.IsActive == "active")
+                        query = query.Where(c => c.IsActive);
+                    else if (request.IsActive == "inactive")
+                        query = query.Where(c => !c.IsActive);
+                }
+
+             
+
+                var result = await query.ToListAsync();
+
+                if (request.AvailableDays != null && request.AvailableDays.Any())
+                {
+                    result = result.Where(c =>
+                        c.AvailableDays != null &&
+                        request.AvailableDays.Any(day =>
+                            c.AvailableDays.Split(',').Contains(day, StringComparer.OrdinalIgnoreCase)))
+                        .ToList();
+                }
+
+                List<ClinicCategoryListDTO> clinicCategoryListDTO = new List<ClinicCategoryListDTO>();
+
+                foreach(var c in result)
+                {
+                    clinicCategoryListDTO.Add(new ClinicCategoryListDTO
+                    {
+                        Id = c.Id,
+                        ClinicCategoryName = c.Name,
+                        Description = c.Description,
+                        AvailableDays = c.AvailableDays.Split(','),
+                        IsActive = c.IsActive,
+                        CreatedAt = c.CreatedAt
+                    });
+                }
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = clinicCategoryListDTO
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while filtering Clinic Categories.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while filtering Clinic Categories." }
+                };
+            }
+        }
+
     }
 }

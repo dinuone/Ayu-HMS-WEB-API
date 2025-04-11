@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BookInventory.Models;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
@@ -24,7 +23,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         public required string Username { get; set; }
 
         [Column("password", TypeName ="varchar(128)")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Column("role")]
         public long Role { get; set; }

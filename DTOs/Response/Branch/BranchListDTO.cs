@@ -9,13 +9,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("phone_number")]
-        public string PhoneNumber { get;set; }
+        public string? PhoneNumber { get;set; }
 
         [JsonPropertyName("address")]
-        public string Address { get; set; } 
+        public string? Address { get; set; } 
 
     }
 }

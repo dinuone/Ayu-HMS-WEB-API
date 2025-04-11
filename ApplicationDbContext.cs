@@ -1,4 +1,4 @@
-﻿using BookInventory.Models;
+﻿
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +27,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <DiseaseCodeModel> DiseaseCodes { get; set; }
         public DbSet <DrugCategoryModel> drugcategories { get; set; }
         public DbSet <RoleModel> Roles { get; set; }
+        public DbSet <RatesModel> Rates { get; set; }
+        public DbSet <SequenceDataModel> Sequences { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

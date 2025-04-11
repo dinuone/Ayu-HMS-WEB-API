@@ -8,9 +8,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string TreatmentName { get; set; }
+        public string? TreatmentName { get; set; }
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }
