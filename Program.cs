@@ -15,6 +15,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory;
 using Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory;
 using Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode;
 using Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Rates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddScoped<ITreatmentCategoryService, TreatmentCategoryService>(
 builder.Services.AddScoped<IClinicCategoryService, ClinicCategoryService>();
 builder.Services.AddScoped<IDiseaseCodeService,DiseaseCodeService >();
 builder.Services.AddScoped<IDrugCategoryService, DrugCategoryService>();
+builder.Services.AddScoped<IRatesService, RatesService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
