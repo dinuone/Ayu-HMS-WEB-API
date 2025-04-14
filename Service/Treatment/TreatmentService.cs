@@ -170,7 +170,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
                     TreatmentCategory = new TreatmentCategoryDataDTO
                     {
                         Id = treatment.Id,
-                        TreatmentCategoryName = treatment.CategoryName
+                        Name = treatment.CategoryName
                     }
                 };
               

@@ -36,7 +36,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                
                 TreatmentCategoryModel treatmentCategory = new TreatmentCategoryModel
                 {
-                    Name = request.TreatmentCategoryName,
+                    Name = request.Name,
                     Description = request.Description,
                     CreatedBy = createdBy,
                 };
@@ -126,7 +126,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 {
                     TreatmentCategoryListMapp.Add(new TreatmentCategoryListDTO {
                         Id = treatmentCategory.Id,
-                        TreatmentCategoryName = treatmentCategory.Name,
+                        Name = treatmentCategory.Name,
                         Description = treatmentCategory.Description,
                         CreatedBy = treatmentCategory.CreatedBy,
                         IsActive = treatmentCategory.IsActive,
@@ -180,7 +180,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 TreatmentCategoryDataDTO treatmentCategoryData = new TreatmentCategoryDataDTO()
                 {
                     Id = treatmentCategory.Id,
-                    TreatmentCategoryName = treatmentCategory.Name,
+                    Name = treatmentCategory.Name,
                     Description = treatmentCategory.Description
                 };
 
@@ -228,7 +228,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
                 string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                treatmentCategory.Name = request.TreatmentCategoryName;
+                treatmentCategory.Name = request.Name;
                 treatmentCategory.Description = request.Description;
                 treatmentCategory.UpdatedBy = updatedBy;
 
@@ -376,7 +376,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 var treatmentCategoryList = await query.Select(data => new TreatmentCategoryListDTO
                 {
                     Id = data.Id,
-                    TreatmentCategoryName = data.Name,
+                    Name = data.Name,
                     Description = data.Description,
                     IsActive = data.IsActive,
                     CreatedAt = data.CreatedAt
