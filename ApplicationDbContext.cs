@@ -26,6 +26,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <TreatmentModel> Treatments { get; set; }
         public DbSet <DiseaseCodeModel> DiseaseCodes { get; set; }
         public DbSet <DrugCategoryModel> drugcategories { get; set; }
+        public DbSet<DrugModel> drugs { get; set; }
+        public DbSet <PatientModel> patients { get; set; }
         public DbSet <RoleModel> Roles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

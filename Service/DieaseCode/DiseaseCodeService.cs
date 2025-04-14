@@ -146,7 +146,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
             }
             catch (Exception ex)
             {
-
+                logger.LogError(ex, "An error occurred while retrieving all disease codes");
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
