@@ -269,12 +269,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
             return response;
         }
 
+
         public async Task<BaseResponse> UpdateStatus(int id)
         {
             BaseResponse response;
             try
             {
-                var clinicCategory = await _context.ClinicCategories.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+                ClinicCategoryModel? clinicCategory = await _context.ClinicCategories.FirstOrDefaultAsync(c => c.Id == id && !c.IsDelete);
+
 
                 if (clinicCategory == null)
                 {
@@ -283,11 +285,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                         StatusCode = (int)HttpStatusCode.NotFound,
                         Data = new
                         {
-                            message = "Clinic Category not found"
+                            message = "Clinic category not found"
+
                         }
                     };
                     return response;
                 }
+
 
                 clinicCategory.IsActive = !clinicCategory.IsActive;
                 _context.ClinicCategories.Update(clinicCategory);
@@ -308,6 +312,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     Data = new { message = "An error occurred while updating Clinic Category status." }
                 };
             }
+
         }
 
         public async Task<BaseResponse> DeleteAll(List<int> ClinicCtgIds)
@@ -315,6 +320,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
             try
             {
                 var clinicCategories = await _context.ClinicCategories
+
                     .Where(b => ClinicCtgIds.Contains(b.Id) && !b.IsDelete)
                     .ToListAsync();
 
@@ -335,16 +341,19 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                     clinic.UpdatedBy = deletedBy;
                 }
 
+
                 await _context.SaveChangesAsync();
 
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
+
                     Data = new { message = "Clinic Category deleted successfully." }
                 };
             }
             catch (Exception ex)
             {
+
                 logger.LogError(ex, "Error occurred while deleting multiple Disease Codes.");
                 return new BaseResponse
                 {
@@ -411,6 +420,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
+
                     Data = clinicCategoryListDTO
                 };
             }

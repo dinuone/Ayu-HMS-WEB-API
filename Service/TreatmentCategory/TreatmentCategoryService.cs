@@ -36,7 +36,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                
                 TreatmentCategoryModel treatmentCategory = new TreatmentCategoryModel
                 {
-                    Name = request.TreatmentName,
+                    Name = request.TreatmentCategoryName,
                     Description = request.Description,
                     CreatedBy = createdBy,
                 };
@@ -126,7 +126,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 {
                     TreatmentCategoryListMapp.Add(new TreatmentCategoryListDTO {
                         Id = treatmentCategory.Id,
-                        TreatmentName = treatmentCategory.Name,
+                        TreatmentCategoryName = treatmentCategory.Name,
                         Description = treatmentCategory.Description,
                         CreatedBy = treatmentCategory.CreatedBy,
                         IsActive = treatmentCategory.IsActive,
@@ -180,7 +180,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 TreatmentCategoryDataDTO treatmentCategoryData = new TreatmentCategoryDataDTO()
                 {
                     Id = treatmentCategory.Id,
-                    TreatmentName = treatmentCategory.Name,
+                    TreatmentCategoryName = treatmentCategory.Name,
                     Description = treatmentCategory.Description
                 };
 
@@ -228,7 +228,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
                 string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                treatmentCategory.Name = request.TreatmentName;
+                treatmentCategory.Name = request.TreatmentCategoryName;
                 treatmentCategory.Description = request.Description;
                 treatmentCategory.UpdatedBy = updatedBy;
 
@@ -286,7 +286,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = new { message = $"Treatment Category status updated to {(treatmentCategory.IsActive ? "Active" : "Inactive")}." }
+                    Data = new 
+                    { 
+                        message = $"Treatment Category status updated to {(treatmentCategory.IsActive ? "Active" : "Inactive")}." 
+                    }
                 };
             }
             catch (Exception ex)
@@ -373,7 +376,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 var treatmentCategoryList = await query.Select(data => new TreatmentCategoryListDTO
                 {
                     Id = data.Id,
-                    TreatmentName = data.Name,
+                    TreatmentCategoryName = data.Name,
                     Description = data.Description,
                     IsActive = data.IsActive,
                     CreatedAt = data.CreatedAt
@@ -391,7 +394,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new { message = "An error occurred while filtering Treatment Category." }
+                    Data = new { message = "An error occurred while filtering Treatment Category.       " }
                 };
             }
         }

@@ -132,12 +132,21 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                     };
                     return response;
                 }
+
+                DrugCategoryDataDTO drugCategoryDataDTO = new DrugCategoryDataDTO()
+                {
+                    Id = drugCategory.Id,
+                    DrugCategoryName = drugCategory.Name,
+                    Description = drugCategory.Description,
+                };
+
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = drugCategory
                 };
             }
+
             catch (Exception ex)
             {
                 response = new BaseResponse()
@@ -218,7 +227,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                 response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = new { message = "Branch deleted successfully" }
+                    Data = new { message = "Drug deleted successfully" }
                 };
                 return response;
             }
