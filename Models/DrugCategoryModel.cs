@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BookInventory.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models

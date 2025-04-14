@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BookInventory.Models
+namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
     public class BaseEntity
     {

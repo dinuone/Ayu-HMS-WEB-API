@@ -6,12 +6,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
+
         [JsonPropertyName("name")]
-        public string ClinicCategoryName { get; set; }
-        [JsonPropertyName("dayOfTheWeek")]
-        public string DayOfTheWeek { get; set; }
+        public string? ClinicCategoryName { get; set; }
+
+        [JsonPropertyName("available_days")]
+        public string[]? AvailableDays { get; set; }
+
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
     }
 }
