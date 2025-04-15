@@ -115,12 +115,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
 
         }
 
-        public async Task<BaseResponse> GetAll()
+        public async Task<BaseResponse> GetAll(bool isActive)
         {
             BaseResponse response;
             try
             {
-                List<TreatmentCategoryModel> treatmentCategories = await _context.TreatmentCategories.Where(t => t.IsDelete == false).ToListAsync();
+                List<TreatmentCategoryModel> treatmentCategories = await _context.TreatmentCategories.Where(t => t.IsDelete == false && t.IsActive == isActive).ToListAsync();
                 List<TreatmentCategoryListDTO> TreatmentCategoryListMapp = new List<TreatmentCategoryListDTO>();
                 foreach (var treatmentCategory in treatmentCategories)
                 {

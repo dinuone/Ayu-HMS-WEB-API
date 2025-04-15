@@ -52,9 +52,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
         [Authorize]
         [HttpGet("list")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("list/{isActive}")]
+        public async Task<IActionResult> GetAll(bool isActive = true)
         {
-            var response = await _treatmentService.GetAll();
+            var response = await _treatmentService.GetAll(isActive);
             return new JsonResult(response)
             {
                 StatusCode = response.StatusCode
@@ -97,7 +98,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
         [Authorize]
         [HttpPost("filter")]
-        public async Task<IActionResult> Filter(FilterRequest request)
+        public async Task<IActionResult> Filter(FilterRequestTreatment request)
         {
             var response = await _treatmentService.Filter(request);
             return new JsonResult(response)

@@ -11,7 +11,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
         Task<BaseResponse> Create(AddTreatmentCategoryRequest request);
         Task<BaseResponse> Update(int id, AddTreatmentCategoryRequest request);
         Task<BaseResponse> GetById(int id);
-        Task<BaseResponse> GetAll();
+        Task<BaseResponse> GetAll(bool IsActive);
         Task<BaseResponse> Delete(int id);
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> treatmentCtgIds);

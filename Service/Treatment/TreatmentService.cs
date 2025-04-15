@@ -134,24 +134,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
             try
             {
                
-                var treatment = await _context.Treatments
-                    .Where(t => t.Id == id && t.IsDelete == false)
-                    .Join(
-                        _context.TreatmentCategories,
-                        treatment => treatment.TreatmentCategoryId,
-                        category => category.Id,
-                        (treatment, category) => new
-                        {
-                            treatment.Id,
-                            treatment.Name,
-                            treatment.TreatmentPrice,
-                            treatment.CreatedBy,
-                            treatment.CreatedAt,
-                            treatment.IsActive,
-                            CategoryName = category.Name,
-                        }
-                    )
-                    .FirstOrDefaultAsync();
+                TreatmentModel? treatment = await _context.Treatments.Where(t => t.Id == id && t.IsDelete == false).FirstOrDefaultAsync();
 
                 if (treatment == null)
                 {
@@ -167,11 +150,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
                     Id = treatment.Id,
                     TreatmentName = treatment.Name,
                     TreatmentPrice = treatment.TreatmentPrice,
-                    TreatmentCategory = new TreatmentCategoryDataDTO
-                    {
-                        Id = treatment.Id,
-                        Name = treatment.CategoryName
-                    }
+                    TreatmentCategory = treatment.TreatmentCategoryId,
                 };
               
 
@@ -194,27 +173,31 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
                 };
             }
         }
-        public async Task<BaseResponse> GetAll()
+        public async Task<BaseResponse> GetAll(bool IsActive)
         {
            
             try
             {
-                var treatments = await _context.Treatments.Where(t => t.IsDelete == false).Join(
-                    _context.TreatmentCategories,
-                    treatment => treatment.TreatmentCategoryId,
-                    category => category.Id,
-                    (treatment, category) => new
-                    {
-                        treatment.Id,
-                        treatment.Name,
-                        treatment.TreatmentPrice,
-                        treatment.CreatedBy,
-                        treatment.CreatedAt, 
-                        treatment.IsActive,
-                        CategoryName = category.Name,
-                    }
-                ).ToListAsync();
-
+                var treatments = await _context.Treatments
+                   .Where(t => !t.IsDelete && t.IsActive == IsActive)
+                   .Join(
+                       _context.TreatmentCategories,
+                       treatment => treatment.TreatmentCategoryId,
+                       category => category.Id,
+                       (treatment, category) => new TreatmentListDTO
+                       {
+                           Id = treatment.Id,
+                           TreatmentName = treatment.Name,
+                           TreatmentPrice = treatment.TreatmentPrice,
+                           IsActive = treatment.IsActive,
+                           CreatedBy = treatment.CreatedBy,
+                           CreatedAt = treatment.CreatedAt,
+                           TreatmentCategory = new TreatmentCategoryDataDTO
+                           {
+                               Name = category.Name
+                           }
+                       }
+                   ).ToListAsync();
 
 
                 var response = new BaseResponse()
@@ -234,6 +217,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
                 };
             }
         }
+
+
+
         public async Task<BaseResponse> Delete(int id)
         {
             BaseResponse response;
@@ -380,39 +366,56 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
             }
         }
 
-        public async Task<BaseResponse> Filter(FilterRequest request)
+        public async Task<BaseResponse> Filter(FilterRequestTreatment request)
         {
             try
             {
                 IQueryable<TreatmentModel> query = _context.Treatments.Where(t => !t.IsDelete);
-                if (request.FromDate != null) 
+
+                // Check if the TreatmentCategoryId array is provided and has any values
+                if (request.TreatmentCategoryIds != null && request.TreatmentCategoryIds.Any())
+                {
+                    query = query.Join(
+                        _context.TreatmentCategories,
+                        treatment => treatment.TreatmentCategoryId,
+                        category => category.Id,
+                        (treatment, category) => new { treatment, category }
+                    )
+                    .Where(tc => request.TreatmentCategoryIds.Contains(tc.category.Id)) // Check if category is in the provided list
+                    .Select(tc => tc.treatment);
+                }
+
+                // Date filters
+                if (request.FromDate != null)
                 {
                     var fromDate = request.FromDate.Value.Date;
                     query = query.Where(t => t.CreatedAt.Date >= fromDate);
                 }
+
                 if (request.ToDate != null)
                 {
                     var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
                     query = query.Where(t => t.CreatedAt.Date <= toDate);
                 }
-                if (request.IsActive != "All")
+
+                // IsActive filter
+                if (!string.IsNullOrEmpty(request.IsActive) && request.IsActive != "All")
                 {
                     if (request.IsActive == "active")
                         query = query.Where(t => t.IsActive);
-                    else if (request.IsActive == "inactve")
+                    else if (request.IsActive == "inactive")
                         query = query.Where(t => !t.IsActive);
-
                 }
 
+                // Fetch the filtered data
                 var treatmentList = await query.Select(data => new TreatmentListDTO
                 {
                     Id = data.Id,
                     TreatmentName = data.Name,
                     TreatmentPrice = data.TreatmentPrice,
+                    TreatmentCategory =
                     CreatedAt = data.CreatedAt,
                     IsActive = data.IsActive,
-                  
-
                 }).ToListAsync();
 
                 return new BaseResponse
@@ -424,16 +427,17 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
             }
             catch (Exception ex)
             {
-
-               logger.LogError(ex, "An error occurred while filtering treatments");
+                logger.LogError(ex, "An error occurred while filtering treatments");
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new { message = "An error occurred while filtering Treatment." }
                 };
             }
-            
+
+
         }
+
     }
 
 }

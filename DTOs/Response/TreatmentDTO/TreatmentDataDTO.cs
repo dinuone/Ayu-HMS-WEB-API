@@ -8,13 +8,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonPropertyName("name")]
+        [JsonPropertyName("treatment_name")]
         public string TreatmentName { get; set; }
 
-        [JsonPropertyName("price")]
+        [JsonPropertyName("treatment_price")]
         public decimal TreatmentPrice { get; set; }
 
         [JsonPropertyName("treatment_category")]
-        public TreatmentCategoryDataDTO TreatmentCategory { get; set; } 
+        public long TreatmentCategory { get; set; } 
     }
 }

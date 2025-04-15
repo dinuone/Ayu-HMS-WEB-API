@@ -13,4 +13,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO
         [JsonPropertyName("description")]
         public string? Description { get; set; }
     }
+
+    
 }

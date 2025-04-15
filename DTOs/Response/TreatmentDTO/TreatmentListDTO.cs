@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO
 {
-    public class TreatmentListDTO :BaseResponseDTO
+    public class TreatmentListDTO : BaseResponseDTO
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
