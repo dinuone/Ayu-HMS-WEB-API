@@ -21,7 +21,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO
         public decimal UnitPrice { get; set; }
 
         [JsonPropertyName("drug_category")]
-        public DrugCategoryDataDTO DrugCategory { get; set; }
+        public long DrugCategory { get; set; }
 
 
     }

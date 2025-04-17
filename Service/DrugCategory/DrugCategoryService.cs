@@ -162,13 +162,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
             return response;
         }
 
-        public async Task<BaseResponse> GetAll()
+        public async Task<BaseResponse> GetAll(bool IsActive)
         {
             BaseResponse response;
             try
             {
                 var drugCategories = await _context.drugcategories
-                    .Where(d => d.IsDelete == false)
+                    .Where(d => d.IsDelete == false && d.IsActive == IsActive)
                     .Select(d => new DrugcategoryListDTO
                     {
                         Id = d.Id,

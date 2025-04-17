@@ -30,7 +30,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         }
 
         [Authorize]
-        [HttpPost("update/{id}")]
+        [HttpPut("update/{id}")]
 
         public async Task<IActionResult> Update(int id, AddDrugRequest request)
         {
@@ -93,7 +93,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
 
         [Authorize]
-        [HttpPost("update-status/{id}")]
+        [HttpGet("update-status/{id}")]
 
         public async Task<IActionResult> UpdateStatus(int id)
         {
@@ -108,7 +108,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         [Authorize]
         [HttpPost("filter")]
 
-        public async Task<IActionResult> Filter([FromBody] FilterRequest request)
+        public async Task<IActionResult> Filter(FilterRequestDrug request)
         {
             var response = await _drugService.Filter(request);
             return new JsonResult(response)

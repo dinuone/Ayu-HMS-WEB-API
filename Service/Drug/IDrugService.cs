@@ -13,6 +13,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         Task<BaseResponse> Delete(int id);
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> treatmentIds);
-        Task<BaseResponse> Filter(FilterRequest request);
+        Task<BaseResponse> Filter(FilterRequestDrug request);
     }
 }

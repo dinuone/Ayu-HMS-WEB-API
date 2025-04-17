@@ -98,7 +98,7 @@ builder.Services.AddSwaggerGen(swagger =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:5173")
+        builder => builder.WithOrigins("http://localhost:5173", "https://harendra-ayu-hms.cadvex.com")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials());

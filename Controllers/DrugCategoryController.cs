@@ -43,9 +43,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
         [Authorize]
         [HttpGet("list")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("list/{isActive}")]
+        public async Task<IActionResult> GetAll(bool isActive = true)
         {
-            var response = await drugCategoryService.GetAll();
+            var response = await drugCategoryService.GetAll(isActive);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 

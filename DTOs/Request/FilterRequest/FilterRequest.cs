@@ -25,4 +25,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest
         [JsonPropertyName("category_ids")]
         public int[] TreatmentCategoryIds { get; set; }
     }
+
+
+    public class FilterRequestDrug : FilterRequest
+    {
+        [JsonPropertyName("category_ids")]
+        public int[] DrugCategoryIds { get; set; }
+    }
 }

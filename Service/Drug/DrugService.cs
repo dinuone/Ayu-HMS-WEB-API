@@ -3,6 +3,7 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DrugRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
@@ -65,7 +66,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 var response = new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = new { message = "Drug created successfully", drug.Id }
+                    Data = new { message = "Drug created successfully" }
                 };
                 return response;
             }
@@ -162,7 +163,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                         drug.CreatedBy,
                         drug.CreatedAt,
                         drug.IsActive,
-                        DrugCategoryName = drugCategory.Name,
                         DrugCategoryId = drugCategory.Id
 
 
@@ -188,12 +188,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     Brand = drug.Brand,
                     Description = drug.Description,
                     UnitPrice = drug.UnitPrice,
-                    DrugCategory = new DrugCategoryDataDTO
-                    {
-                        Id = drug.DrugCategoryId, 
-                        DrugCategoryName = drug.DrugCategoryName
-                    }
-
+                    DrugCategory =drug.DrugCategoryId
                 };
 
                 return new BaseResponse
@@ -219,25 +214,31 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                var drugs = await _context.drugs.Where(d => d.IsDelete == false).Join(
-                    _context.drugcategories, 
-                    drug => drug.DrugCategoryId,
-                    drugCategory => drugCategory.Id,
-                    (drug, drugcategory) => new 
-                    {
-                        drug.Id,
-                        drug.Name,
-                        drug.Brand,
-                        drug.Description,
-                        drug.UnitPrice,
-                        drug.CreatedBy,
-                        drug.CreatedAt,
-                        drug.IsActive,
-                        DrugCategoryName = drugcategory.Name,
-                    }
-                    ).ToListAsync();
+                var drugs = await _context.drugs
+                    .Where(d => d.IsDelete == false)
+                    .Join(
+                        _context.drugcategories,
+                        drug => drug.DrugCategoryId,
+                        drugCategory => drugCategory.Id,
+                        (drug, drugCategory) => new DrugListDTO
+                        {
+                            Id = drug.Id,
+                            DrugName = drug.Name,
+                            Brand = drug.Brand,
+                            Description = drug.Description,
+                            UnitPrice = drug.UnitPrice,
+                            CreatedBy = drug.CreatedBy,
+                            CreatedAt = drug.CreatedAt,
+                            IsActive = drug.IsActive,
+                            DrugCategory = new DrugCategoryDataDTO
+                            {
+                                Id = drugCategory.Id,
+                                DrugCategoryName = drugCategory.Name
+                            }
+                        })
+                    .ToListAsync();
 
-                var response = new BaseResponse()
+                var response = new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = drugs
@@ -246,15 +247,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             }
             catch (Exception ex)
             {
-
                 logger.LogError(ex, "An error occurred while retrieving all drugs");
-                return new BaseResponse()
+                return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new { message = ex.Message }
                 };
             }
         }
+
 
 
         public async Task<BaseResponse> Delete(int id)
@@ -336,7 +337,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = new
                     {
-                        message = $"Treatment status updated to {(drug.IsActive ? "Active" : "Inactive")}."
+                        message = $"Drug status updated to {(drug.IsActive ? "Active" : "Inactive")}."
                     }
                 };
             }
@@ -363,7 +364,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                var drugs = await _context.Treatments
+                var drugs = await _context.drugs
                     .Where(d => drugIds.Contains(d.Id) && !d.IsDelete).ToListAsync();
 
                 if (!drugs.Any())
@@ -410,53 +411,70 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             }
         }
 
-        public async Task<BaseResponse> Filter(FilterRequest request)
+        public async Task<BaseResponse> Filter(FilterRequestDrug request)
         {
             try
             {
-                IQueryable<DrugModel> query = _context.drugs.Where(d => !d.IsDelete);
+                IQueryable<DrugModel> query = _context.drugs.Where(t => !t.IsDelete);
+
+                if (request.DrugCategoryIds != null && request.DrugCategoryIds.Any())
+                {
+                    query = query.Join(
+                        _context.drugcategories,
+                        drug => drug.DrugCategoryId,
+                        category => category.Id,
+                        (drug, category) => new { drug, category }
+                    )
+                    .Where(dc => request.DrugCategoryIds.Contains(dc.category.Id))
+                    .Select(dc => dc.drug);
+                }
+
                 if (request.FromDate != null)
                 {
                     var fromDate = request.FromDate.Value.Date;
-                    query = query.Where(d => d.CreatedAt.Date >= fromDate);
+                    query = query.Where(t => t.CreatedAt.Date >= fromDate);
                 }
+
                 if (request.ToDate != null)
                 {
                     var toDate = request.ToDate.Value.Date.AddDays(1).AddMilliseconds(-1);
-                    query = query.Where(d => d.CreatedAt.Date <= toDate);
-                }
-                if (request.IsActive != "All")
-                {
-                    if (request.IsActive == "active")
-                        query = query.Where(d => d.IsActive);
-                    else if (request.IsActive == "inactive")
-                        query = query.Where(d => !d.IsActive);
+                    query = query.Where(t => t.CreatedAt.Date <= toDate);
                 }
 
-                var drugList = await query.Select(data => new DrugListDTO
+                if (!string.IsNullOrEmpty(request.IsActive) && request.IsActive != "All")
                 {
-                    Id = data.Id,
-                    DrugName = data.Name, // Set the required 'DrugName' property
-                    Brand = data.Brand,
-                    Description = data.Description,
-                    UnitPrice = data.UnitPrice,
-                    //DrugCategory = new DrugCategoryDataDTO
-                    //{
-                    //    Id = (int)data.DrugCategoryId, // Explicitly cast 'long' to 'int'
-                    //    DrugCategoryName = _context.drugcategories
-                    //        .Where(dc => dc.Id == data.DrugCategoryId)
-                    //        .Select(dc => dc.Name)
-                    //        .FirstOrDefault() ?? string.Empty // Handle possible null reference
-                    //},
-                    CreatedBy = data.CreatedBy,
-                    IsActive = data.IsActive,
-                    CreatedAt = data.CreatedAt
-                }).ToListAsync();
+                    if (request.IsActive == "active")
+                        query = query.Where(t => t.IsActive);
+                    else if (request.IsActive == "inactive")
+                        query = query.Where(t => !t.IsActive);
+                }
+
+                var treatmentData = await query.ToListAsync();
+
+                // Now build the DTOs
+                var drugcategoryLists = new List<DrugListDTO>();
+                foreach (var data in treatmentData)
+                {
+                    DrugCategoryDataDTO categoryName = await GetDrugCategoryName(data.DrugCategoryId, _context);
+                    drugcategoryLists.Add(new DrugListDTO
+                    {
+                        Id = data.Id,
+                        Description = data.Description,
+                        Brand = data.Brand,
+                        DrugCategory = categoryName,
+                        CreatedAt = data.CreatedAt,
+                        CreatedBy = data.CreatedBy,
+                        DrugName = data.Name,
+                        IsActive = data.IsActive,
+                        UnitPrice = data.UnitPrice
+
+                    });
+                }
 
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = drugList
+                    Data = drugcategoryLists
                 };
             }
             catch (Exception ex)
@@ -465,15 +483,30 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new { message = ex.Message }
+                    Data = new { message = "An error occurred while filtering drugs." }
                 };
             }
         }
 
-      
 
-       
+        public static async Task<DrugCategoryDataDTO> GetDrugCategoryName(long id, ApplicationDBContext context)
+        {
+            var treatmentCategory = await context.drugcategories
+                .Where(t => t.Id == id)
+                .FirstOrDefaultAsync();
 
-       
+            if (treatmentCategory != null)
+            {
+                return new DrugCategoryDataDTO
+                {
+                    Id = treatmentCategory.Id,
+                    DrugCategoryName = treatmentCategory.Name
+                };
+            }
+
+            return new DrugCategoryDataDTO();
+        }
+
+
     }
 }
