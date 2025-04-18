@@ -1,0 +1,30 @@
+﻿using System.Text.Json.Serialization;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
+
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.OffersDTO
+{
+    public class OffersListDTO : BaseResponseDTO
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("offer_name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("discount_percentage")]
+        public decimal DiscountPercentage { get; set; }
+
+        [JsonPropertyName("start_date")]
+        public DateTime StartDate { get; set; }
+
+        [JsonPropertyName("end_date")]
+        public DateTime EndDate { get; set; }
+
+        [JsonPropertyName("treatment")]
+        public TreatmentDataDTO Treatment { get; set; }
+
+    }
+}

@@ -63,7 +63,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         }
 
         [Authorize]
-        [HttpPost("delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _treatmentService.Delete(id);

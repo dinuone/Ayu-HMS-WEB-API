@@ -31,6 +31,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <RoleModel> Roles { get; set; }
         public DbSet <RatesModel> Rates { get; set; }
         public DbSet <SequenceDataModel> Sequences { get; set; }
+        public DbSet <OffersModel> offers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
