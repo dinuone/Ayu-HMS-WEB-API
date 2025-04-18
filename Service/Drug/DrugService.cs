@@ -336,7 +336,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     StatusCode = (int)HttpStatusCode.OK,
                     Data = new
                     {
-                        message = $"Treatment status updated to {(drug.IsActive ? "Active" : "Inactive")}."
+                        message = $"Drug status updated to {(drug.IsActive ? "Active" : "Inactive")}."
                     }
                 };
             }

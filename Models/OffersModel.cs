@@ -26,6 +26,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         
         [Column("end_date")]
         public DateTime EndDate { get; set; }
+
+        [Column("treatment_id")]
+        public int TreatmentId { get; set; }
     }
     
 }

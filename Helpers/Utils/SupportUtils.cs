@@ -22,5 +22,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils
 
             return random.Next(1000, 9999).ToString();
         }
+
+        public static DateTime ConvertUTCDateToLocalDate(DateTime utcDate, TimeZoneInfo localTimeZone)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDate, localTimeZone);
+        }
     }
 }
