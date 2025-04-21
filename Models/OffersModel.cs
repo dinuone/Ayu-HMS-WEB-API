@@ -20,7 +20,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
        
         [Column("discount_percentage")]
         public decimal DiscountPercentage { get; set; }
-        
+
+        [Column("platform")]
+        public string platoform { get; set; }
+
         [Column("start_date")]
         public DateTime StartDate { get; set; }
         

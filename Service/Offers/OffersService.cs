@@ -59,10 +59,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     StartDate = SupportUtils.ConvertUTCDateToLocalDate(request.StartDate, localTimezone),
                     EndDate = SupportUtils.ConvertUTCDateToLocalDate(request.EndDate, localTimezone),
                     TreatmentId = request.TreatmentId,
+                    platoform = request.Platform,
                     CreatedBy = CreatedBy,
                 };
 
-                await _context.offers.AddAsync(offer);
+                await _context.offers    .AddAsync(offer);
                 await _context.SaveChangesAsync();
 
 
@@ -103,6 +104,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                             Name = offer.Name,
                             Description = offer.Description,
                             DiscountPercentage = offer.DiscountPercentage,
+                            Platform = offer.platoform,
                             StartDate = offer.StartDate,
                             EndDate = offer.EndDate,
                             CreatedBy = offer.CreatedBy,
@@ -157,6 +159,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     Name = offer.Name,
                     Description = offer.Description,
                     DiscountPercentage = offer.DiscountPercentage,
+                    Platform = offer.platoform,
                     StartDate = TimeZoneInfo.ConvertTimeFromUtc(offer.StartDate, localTimezone),
                     EndDate = TimeZoneInfo.ConvertTimeFromUtc(offer.EndDate, localTimezone),
                     Treatment = offer.TreatmentId,
@@ -206,6 +209,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                 offer.Name = request.Name;
                 offer.Description = request.Description;
                 offer.DiscountPercentage = request.DiscountPercentage;
+                offer.platoform = request.Platform;
                 offer.StartDate = SupportUtils.ConvertUTCDateToLocalDate(request.StartDate, localTimezone);
                 offer.EndDate = SupportUtils.ConvertUTCDateToLocalDate(request.EndDate, localTimezone);
                 offer.TreatmentId = request.TreatmentId;
@@ -369,6 +373,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     Name = data.Name,
                     Description = data.Description,
                     DiscountPercentage = data.DiscountPercentage,
+                    Platform = data.platoform,
                     StartDate = data.StartDate,
                     EndDate = data.EndDate,
                     CreatedBy = data.CreatedBy,

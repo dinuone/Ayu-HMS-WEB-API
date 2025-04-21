@@ -26,5 +26,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.OffersDTO
         [JsonPropertyName("treatment")]
         public TreatmentDataDTO Treatment { get; set; }
 
+        [JsonPropertyName("platform")]
+        public string Platform { get; set; }
+
     }
 }
