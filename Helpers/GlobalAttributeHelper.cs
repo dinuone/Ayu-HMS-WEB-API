@@ -25,5 +25,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public double HoldAttachmentCount;
         }
 
+        public class PatientVisitStatus
+        {
+            public static string PENDING { get { return "PENDING"; } private set { } }
+            public static string ONGOING { get { return "ONGOING"; } private set { } }
+            public static string COMPLETE { get { return "COMPLETE"; } private set { } }
+        }
+
     }
 }
