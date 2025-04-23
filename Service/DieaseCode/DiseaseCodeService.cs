@@ -15,7 +15,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
     {
         private readonly ApplicationDBContext _context;
         private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly ILogger<IDiseaseCodeService> logger;
+        private readonly ILogger<DiseaseCodeService> logger;
         TimeZoneInfo localTimeZone;
 
         public DiseaseCodeService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<DiseaseCodeService> logger)
@@ -303,7 +303,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode
         {
             try
             {
-                var drugCategories = await _context.drugcategories
+                var drugCategories = await _context.DrugCategories
                     .Where(b => DrugCtgIds.Contains(b.Id) && !b.IsDelete)
                     .ToListAsync();
 

@@ -12,7 +12,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("name",TypeName ="varchar(128)")]
+        [Column("name", TypeName = "varchar(128)")]
         public required string Name { get; set; }
 
         [Column("price")]
