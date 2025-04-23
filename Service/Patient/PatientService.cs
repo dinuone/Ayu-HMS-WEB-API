@@ -5,6 +5,7 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
 using Microsoft.EntityFrameworkCore;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
@@ -14,14 +15,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
         private readonly ApplicationDBContext _context;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<IPatientService> logger;
+        private readonly ILocationService locationService;
         TimeZoneInfo localtimeZone;
 
-        public PatientService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientService> logger)
+        public PatientService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientService> logger, ILocationService locationService)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             localtimeZone = TimeZoneInfo.Local;
+            this.locationService = locationService;
         }
 
         public async Task<BaseResponse> Create(AddPatientRequest request)
@@ -51,6 +54,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     CreatedBy = createdBy,
                     CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, localtimeZone)
                 };
+
+                //check city is new 
+                locationService.CheckCityExist(request.District, request.City);
+
+
                 _context.Set<PatientModel>().Add(patient);
                 await _context.SaveChangesAsync();
 
@@ -84,7 +92,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             BaseResponse response;
             try
             {
-                List<PatientModel> patients = await _context.patients.Where(p => p.IsDelete == false).ToListAsync();
+                List<PatientModel> patients = await _context.Patients.Where(p => p.IsDelete == false).ToListAsync();
                 List<PatientListDTO> patientListmapp = new List<PatientListDTO>();
 
                 foreach (var patient in patients)
@@ -321,7 +329,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
         {
             try
             {
-                var patients = await _context.patients
+                var patients = await _context.Patients
                     .Where(p => patientIds.Contains(p.Id) && !p.IsDelete)
                     .ToListAsync();
                 if (!patients.Any()) 
@@ -369,7 +377,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
         {
             try
             {
-                IQueryable<PatientModel> query = _context.patients.Where(p => !p.IsDelete);
+                IQueryable<PatientModel> query = _context.Patients.Where(p => !p.IsDelete);
                 if (request.FromDate != null) 
                 {
                     var fromDate = request.FromDate.Value.Date;
@@ -436,7 +444,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             BaseResponse response;
             try
             {
-                var patient = await _context.patients.FirstOrDefaultAsync(p => p.Id == id && !p.IsDelete);
+                var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id && !p.IsDelete);
                 if (patient == null)
                 {
                     response = new BaseResponse()
@@ -450,7 +458,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     return response;
                 }
                 patient.IsActive = !patient.IsActive;
-                _context.patients.Update(patient);
+                _context.Patients.Update(patient);
                 await _context.SaveChangesAsync();
 
                 return new BaseResponse

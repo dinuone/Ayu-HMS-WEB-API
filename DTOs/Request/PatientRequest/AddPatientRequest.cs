@@ -6,6 +6,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
     {
         [JsonPropertyName("name")]
         public required string Name { get; set; }
+
         [JsonPropertyName("registration_number")]
         public required string RegistrationNumber { get; set; }
 

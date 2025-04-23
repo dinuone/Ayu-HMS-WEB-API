@@ -14,7 +14,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
     {
         private readonly ApplicationDBContext _context;
         private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly ILogger<IDrugCategoryService> logger;
+        private readonly ILogger<DrugCategoryService> logger;
         TimeZoneInfo localTimeZone;
 
         public DrugCategoryService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<DrugCategoryService> logger)
@@ -167,7 +167,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
             BaseResponse response;
             try
             {
-                var drugCategories = await _context.drugcategories
+                var drugCategories = await _context.DrugCategories
                     .Where(d => d.IsDelete == false && d.IsActive == IsActive)
                     .Select(d => new DrugcategoryListDTO
                     {
@@ -250,7 +250,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
         {
             try
             {
-                var drugCategory = await _context.drugcategories.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
+                var drugCategory = await _context.DrugCategories.FirstOrDefaultAsync(u => u.Id == id && !u.IsDelete);
 
                 if (drugCategory == null)
                 {
@@ -258,7 +258,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                 }
 
                 drugCategory.IsActive = !drugCategory.IsActive;
-                _context.drugcategories.Update(drugCategory);
+                _context.DrugCategories.Update(drugCategory);
                 await _context.SaveChangesAsync();
 
                 return new BaseResponse
@@ -282,7 +282,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
         {
             try
             {
-                var drugCategories = await _context.drugcategories
+                var drugCategories = await _context.DrugCategories
                     .Where(b => DrugCtgIds.Contains(b.Id) && !b.IsDelete)
                     .ToListAsync();
 
@@ -326,7 +326,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
         {
             try
             {
-                IQueryable<DrugCategoryModel> query = _context.drugcategories.Where(b => !b.IsDelete);
+                IQueryable<DrugCategoryModel> query = _context.DrugCategories.Where(b => !b.IsDelete);
 
                 if (request.FromDate != null)
                 {

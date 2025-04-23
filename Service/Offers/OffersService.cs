@@ -62,7 +62,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     CreatedBy = CreatedBy,
                 };
 
-                await _context.offers.AddAsync(offer);
+                await _context.Offers.AddAsync(offer);
                 await _context.SaveChangesAsync();
 
 
@@ -91,7 +91,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
         {
             try
             {
-                var offer = await _context.offers
+                var offer = await _context.Offers
                     .Where(o => !o.IsDelete && o.IsActive == IsActive)
                     .Join(
                         _context.Treatments,
@@ -141,7 +141,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
         {
             try
             {
-                OffersModel? offer = await _context.offers.Where(o => o.Id == id && o.IsDelete == false).FirstOrDefaultAsync();
+                OffersModel? offer = await _context.Offers.Where(o => o.Id == id && o.IsDelete == false).FirstOrDefaultAsync();
                 if (offer == null)
                 {
                     return new BaseResponse
@@ -291,7 +291,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
         {
             try
             {
-                var offers = await _context.offers
+                var offers = await _context.Offers
                     .Where(o => OfferIds.Contains(o.Id) && !o.IsDelete).ToListAsync();
 
                 if (!offers.Any())
@@ -343,7 +343,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
            
                 try
                 {
-                    IQueryable<OffersModel> query = _context.offers.Where(o => !o.IsDelete);
+                    IQueryable<OffersModel> query = _context.Offers.Where(o => !o.IsDelete);
 
                     if (request.FromDate != null)
                     {
@@ -408,7 +408,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
             BaseResponse response;
             try
             {
-                var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == id
+                var offer = await _context.Offers.FirstOrDefaultAsync(o => o.Id == id
                 && !o.IsDelete);
 
                 if (offer == null)
@@ -426,7 +426,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
 
 
                 offer.IsActive = !offer.IsActive;
-                _context.offers.Update(offer);
+                _context.Offers.Update(offer);
                 await _context.SaveChangesAsync();
 
 

@@ -20,6 +20,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.Patient;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Drug;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Rates;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Offers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,11 @@ builder.Services.AddScoped<ITreatmentService, TreatmentService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IRatesService, RatesService>();
 builder.Services.AddScoped<IOffersService, OffersService>();
+builder.Services.AddScoped<ILocationService,LocationService>();
+
+
+
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -99,7 +105,7 @@ builder.Services.AddSwaggerGen(swagger =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:5173", "https://harendra-ayu-hms.cadvex.com")
+        builder => builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "https://harendra-ayu-hms.cadvex.com")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials());

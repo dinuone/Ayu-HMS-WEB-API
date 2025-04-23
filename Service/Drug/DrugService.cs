@@ -34,7 +34,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
                
-                var drugExists = await _context.drugcategories
+                var drugExists = await _context.DrugCategories
                     .AnyAsync(d => d.Id == request.DrugCategoryId
                     && d.IsActive == true && d.IsDelete == false);
                 if (!drugExists)
@@ -60,7 +60,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
 
                 };
 
-                await _context.drugs.AddAsync(drug);
+                await _context.Drugs.AddAsync(drug);
                 await _context.SaveChangesAsync();
 
                 var response = new BaseResponse
@@ -148,9 +148,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                var drug = await _context.drugs
+                var drug = await _context.Drugs
                     .Where(d => d.Id == id && d.IsDelete == false).Join(
-                    _context.drugcategories,
+                    _context.DrugCategories,
                     drug => drug.DrugCategoryId,
                     drugCategory => drugCategory.Id,
                     (drug, drugCategory) => new
@@ -214,10 +214,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                var drugs = await _context.drugs
+                var drugs = await _context.Drugs
                     .Where(d => d.IsDelete == false)
                     .Join(
-                        _context.drugcategories,
+                        _context.DrugCategories,
                         drug => drug.DrugCategoryId,
                         drugCategory => drugCategory.Id,
                         (drug, drugCategory) => new DrugListDTO
@@ -310,7 +310,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             BaseResponse response;
             try
             {
-                var drug = await _context.drugs.FirstOrDefaultAsync(d => d.Id == id
+                var drug = await _context.Drugs.FirstOrDefaultAsync(d => d.Id == id
                 && !d.IsDelete);
 
                 if (drug == null)
@@ -328,7 +328,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
 
 
                 drug.IsActive = !drug.IsActive;
-                _context.drugs.Update(drug);
+                _context.Drugs.Update(drug);
                 await _context.SaveChangesAsync();
 
 
@@ -364,7 +364,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                var drugs = await _context.drugs
+                var drugs = await _context.Drugs
                     .Where(d => drugIds.Contains(d.Id) && !d.IsDelete).ToListAsync();
 
                 if (!drugs.Any())
@@ -415,12 +415,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         {
             try
             {
-                IQueryable<DrugModel> query = _context.drugs.Where(t => !t.IsDelete);
+                IQueryable<DrugModel> query = _context.Drugs.Where(t => !t.IsDelete);
 
                 if (request.DrugCategoryIds != null && request.DrugCategoryIds.Any())
                 {
                     query = query.Join(
-                        _context.drugcategories,
+                        _context.DrugCategories,
                         drug => drug.DrugCategoryId,
                         category => category.Id,
                         (drug, category) => new { drug, category }
@@ -491,7 +491,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
 
         public static async Task<DrugCategoryDataDTO> GetDrugCategoryName(long id, ApplicationDBContext context)
         {
-            var treatmentCategory = await context.drugcategories
+            var treatmentCategory = await context.DrugCategories
                 .Where(t => t.Id == id)
                 .FirstOrDefaultAsync();
 
