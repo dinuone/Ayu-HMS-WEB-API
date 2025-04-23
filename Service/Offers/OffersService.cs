@@ -8,6 +8,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.EntityFrameworkCore;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
 {
@@ -60,6 +61,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     EndDate = SupportUtils.ConvertUTCDateToLocalDate(request.EndDate, localTimezone),
                     TreatmentId = request.TreatmentId,
                     CreatedBy = CreatedBy,
+                    //CreatedAt =PatientVisitStatus.PENDING
                 };
 
                 await _context.offers.AddAsync(offer);

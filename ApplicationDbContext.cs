@@ -33,6 +33,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <SequenceDataModel> Sequences { get; set; }
         public DbSet <OffersModel> offers { get; set; }
 
+        public DbSet<PatientVisitModel> patientVisits { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
