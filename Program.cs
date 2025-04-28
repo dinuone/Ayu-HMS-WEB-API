@@ -21,6 +21,9 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.Drug;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Rates;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Offers;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
+using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +39,7 @@ builder.Logging.AddSerilog(logger);
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
 var version = builder.Configuration.GetConnectionString("MySqlVersion");
 var serverVersion = new MySqlServerVersion(ServerVersion.Parse(version));
+GlobalAttributeHelper.fileUploadSettings = builder.Configuration.GetSection("FileUploadSettings").Get<GlobalAttributeHelper.FileUploadSettings>();
 
 GlobalAttributeHelper.mySqlConfiguration.connectionString = connectionString;
 
@@ -52,6 +56,7 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IRatesService, RatesService>();
 builder.Services.AddScoped<IOffersService, OffersService>();
 builder.Services.AddScoped<ILocationService,LocationService>();
+builder.Services.AddScoped<ISequenceGeneratorService, SequenceGeneratorService>();
 
 
 
@@ -114,6 +119,20 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+var provider = new FileExtensionContentTypeProvider();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/Uploads",
+    ContentTypeProvider = provider
+}); ;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

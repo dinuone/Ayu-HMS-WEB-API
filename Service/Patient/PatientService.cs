@@ -6,7 +6,10 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
+using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
 using Microsoft.EntityFrameworkCore;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils.FileUploadHandler;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
 {
@@ -17,14 +20,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
         private readonly ILogger<IPatientService> logger;
         private readonly ILocationService locationService;
         TimeZoneInfo localtimeZone;
+        private readonly ISequenceGeneratorService sequenceGeneratorService;
 
-        public PatientService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientService> logger, ILocationService locationService)
+        public PatientService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientService> logger, ILocationService locationService, ISequenceGeneratorService sequenceGeneratorService)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             localtimeZone = TimeZoneInfo.Local;
             this.locationService = locationService;
+            this.sequenceGeneratorService = sequenceGeneratorService;
         }
 
         public async Task<BaseResponse> Create(AddPatientRequest request)
@@ -32,15 +37,36 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             try
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                // Check if the NIC number already exists
+                bool isNicDuplicate = await _context.Set<PatientModel>().AnyAsync(p => p.NiceNumber == request.NicNumber && p.IsDelete == false);
+
+                if (isNicDuplicate)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new
+                        {
+                            message = "NIC number already exists."
+                        }
+                    };
+                }
+
+                string registrationNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync(Sequences.REGISTRATION_SEQUENCE);
+
+                // Upload QR code
+                FileUploadResponse fileUploadResponse = await UploadFileAsync(request.QrCode, $"qr_code_{registrationNumber}.png", registrationNumber, 0);
+
                 PatientModel patient = new PatientModel
                 {
                     Name = request.Name,
-                    RegistrationNumber = request.RegistrationNumber,
+                    RegistrationNumber = registrationNumber,
                     Age = request.Age,
                     Gender = request.Gender,
                     PatientType = request.PatientType,
                     ContactNo = request.ContactNo,
-                    QrCode = request.QrCode,
+                    QrCode = fileUploadResponse.FilePath,
                     Weight = request.Weight,
                     MaritalStatus = request.MaritalStatus,
                     Occupation = request.Occupation,
@@ -49,32 +75,33 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     City = request.City,
                     District = request.District,
                     Province = request.Province,
+                    NiceNumber = request.NicNumber,
                     IsActive = true,
                     IsDelete = false,
                     CreatedBy = createdBy,
                     CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, localtimeZone)
                 };
 
-                //check city is new 
+                // Check if the city is new
                 locationService.CheckCityExist(request.District, request.City);
-
 
                 _context.Set<PatientModel>().Add(patient);
                 await _context.SaveChangesAsync();
 
-                var response = new BaseResponse 
+                var response = new BaseResponse
                 {
-                    StatusCode =(int)HttpStatusCode.OK,
-                    Data = new 
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new
                     {
                         message = "Patient Created Successfully",
+                        qr_code = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{patient.QrCode}"
                     }
                 };
                 return response;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured while creating a patient");
+                logger.LogError(ex, "An error occurred while creating a patient");
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
@@ -83,10 +110,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         message = ex.Message
                     }
                 };
-                
             }
-          
         }
+
         public async Task<BaseResponse> GetAll()
         {
             BaseResponse response;
@@ -94,7 +120,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             {
                 List<PatientModel> patients = await _context.Patients.Where(p => p.IsDelete == false).ToListAsync();
                 List<PatientListDTO> patientListmapp = new List<PatientListDTO>();
-
+              
                 foreach (var patient in patients)
                 {
                     patientListmapp.Add(new PatientListDTO
@@ -104,23 +130,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         RegistrationNumber = patient.RegistrationNumber,
                         Age = patient.Age,
                         Gender = patient.Gender, 
-                        ContactNo = patient.ContactNo, 
+                        ContactNumber = patient.ContactNo, 
                         PatientType = patient.PatientType,
-                        QrCode = patient.QrCode,
-                        AddressLine1 = patient.AddressLine1,
-                        AddressLine2 = patient.AddressLine2,
-                        City = patient.City,
-                        Region = patient.District,
-                        Province = patient.Province,
-                        Weight = patient.Weight,
-                        MaritalStatus = patient.MaritalStatus,
-                        Occupation = patient.Occupation,
+                        NicNumber = patient.NiceNumber,
                         IsActive = patient.IsActive,
                         CreatedAt = patient.CreatedAt,
                         CreatedBy = patient.CreatedBy,
-
-
-
                     });
 
                 }
@@ -184,6 +199,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Weight = patient.Weight,
                     MaritalStatus = patient.MaritalStatus,
                     Occupation = patient.Occupation,
+                    NicNumber = patient.NiceNumber
+                    
                 };
                 response = new BaseResponse() 
                 {
@@ -213,10 +230,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             BaseResponse response;
             try
             {
+                // Find the patient to update
                 PatientModel? patient = await _context.Set<PatientModel>().FindAsync(id);
                 if (patient == null)
                 {
-                    response = new BaseResponse()
+                    return new BaseResponse()
                     {
                         StatusCode = (int)HttpStatusCode.NotFound,
                         Data = new
@@ -224,17 +242,30 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                             message = "Patient not found"
                         }
                     };
-                    return response;
+                }
 
+                // Check if the NIC number already exists for other patients
+                bool isNicDuplicate = await _context.Set<PatientModel>()
+                                                     .AnyAsync(p => p.NiceNumber == request.NicNumber && p.IsDelete == false && p.Id != id);
 
+                if (isNicDuplicate)
+                {
+                    return new BaseResponse()
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new
+                        {
+                            message = "NIC number already exists for another patient."
+                        }
+                    };
                 }
 
                 string updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
+                // Update the patient's information
                 patient.Name = request.Name;
-                patient.RegistrationNumber = request.RegistrationNumber;
-                patient.QrCode = request.QrCode;
                 patient.Age = request.Age;
+                patient.NiceNumber = request.NicNumber;
                 patient.ContactNo = request.ContactNo;
                 patient.PatientType = request.PatientType;
                 patient.Gender = request.Gender;
@@ -247,9 +278,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 patient.District = request.District;
                 patient.Province = request.Province;
                 patient.UpdatedBy = updatedBy;
+                patient.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, localtimeZone); // You can update the timestamp if needed
 
+                // Save the changes
                 _context.Set<PatientModel>().Update(patient);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
 
                 response = new BaseResponse()
                 {
@@ -259,12 +292,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         message = "Patient updated successfully"
                     }
                 };
-
             }
             catch (Exception ex)
             {
-
-                response = new BaseResponse() 
+                response = new BaseResponse()
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new
@@ -272,11 +303,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         message = ex.Message
                     }
                 };
-                logger.LogError(ex, "Error Occured while updating Pateint data by ID");
+                logger.LogError(ex, "Error occurred while updating patient data by ID");
             }
             return response;
         }
-        
+
+
 
         public async Task<BaseResponse> Delete(long id)
         {
@@ -404,17 +436,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     RegistrationNumber = data.RegistrationNumber,
                     Age = data.Age,
                     Gender = data.Gender,
-                    ContactNo = data.ContactNo,
                     PatientType = data.PatientType, 
-                    QrCode = data.QrCode,
-                    AddressLine1 = data.AddressLine1,
-                    AddressLine2 = data.AddressLine2,
-                    City = data.City,
-                    Region = data.District,
-                    Province = data.Province,
-                    Weight = data.Weight,
-                    MaritalStatus = data.MaritalStatus,
-                    Occupation = data.Occupation,
                     IsActive = data.IsActive,
                     CreatedAt = data.CreatedAt,
                     CreatedBy = data.CreatedBy
@@ -477,5 +499,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 };
             }
         }
+
+       
     }
 }

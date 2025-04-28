@@ -7,9 +7,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
         [JsonPropertyName("name")]
         public required string Name { get; set; }
 
-        [JsonPropertyName("registration_number")]
-        public required string RegistrationNumber { get; set; }
-
         [JsonPropertyName("age")]
         public required int Age { get; set; }
 
@@ -32,7 +29,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
         public required string PatientType { get; set; }
 
         [JsonPropertyName("qr_code")]
-        public string QrCode { get; set; }
+        public required string QrCode { get; set; }
 
         [JsonPropertyName("address_line_1")]
         public string AddressLine1 { get; set; }
@@ -48,6 +45,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
 
         [JsonPropertyName("province")]
         public string Province { get; set; }
+
+        [JsonPropertyName("nic_number")]
+        public string NicNumber { get; set; }   
 
 
 

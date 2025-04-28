@@ -17,7 +17,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         }
 
         [Authorize]
-        [HttpPost("Create")]
+        [HttpPost("create")]
 
         public async Task<IActionResult> Create(AddPatientRequest request)
         {

@@ -7,8 +7,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO
     {
         [JsonPropertyName("id")]
         public long Id { get; set; }
+
         [JsonPropertyName("name")]
         public required string Name { get; set; }
+
         [JsonPropertyName("registration_number")]
         public required string RegistrationNumber { get; set; }
 
@@ -18,37 +20,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO
         [JsonPropertyName("gender")]
         public required string Gender { get; set; }
 
-        [JsonPropertyName("weight")]
-        public int Weight { get; set; }
-
-        [JsonPropertyName("marital_status")]
-        public string MaritalStatus { get; set; }
-
-        [JsonPropertyName("occupation")]
-        public string Occupation { get; set; }
-
-        [JsonPropertyName("contact_no")]
-        public required string ContactNo { get; set; }
+        [JsonPropertyName("nic_number")]
+        public string NicNumber { get; set; }
 
         [JsonPropertyName("patient_type")]
-        public required string PatientType { get; set; }
+        public string PatientType { get; set; }
 
-        [JsonPropertyName("qr_code")]
-        public string QrCode { get; set; }
-
-        [JsonPropertyName("address_line_1")]
-        public string AddressLine1 { get; set; }
-
-        [JsonPropertyName("address_line_2")]
-        public string AddressLine2 { get; set; }
-
-        [JsonPropertyName("city")]
-        public string City { get; set; }
-
-        [JsonPropertyName("district")]
-        public string Region { get; set; }
-
-        [JsonPropertyName("province")]
-        public string Province { get; set; }
+        [JsonPropertyName("contact_no")]
+        public string ContactNumber { get; set; }
+      
     }
 }
