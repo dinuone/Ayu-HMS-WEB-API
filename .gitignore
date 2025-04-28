@@ -38,3 +38,4 @@ out/
 # Resharper folder
 _ReSharper*/
 /appsettings.Development.json
+/Uploads/QrCode
