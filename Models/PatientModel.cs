@@ -14,11 +14,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("registration_number", TypeName = "varchar(128)")]
         public required string RegistrationNumber { get; set; }
 
-        [Column("qr_code")]
-        public string QrCode { get; set; }
-
         [Column("name", TypeName = "varchar(128)")]
         public required string Name { get; set; }
+
+        [Column("nic_number" , TypeName = "varchar(128)")]
+        public required string NiceNumber { get; set; } 
 
         [Column("age")]
         public required int Age { get; set; }
@@ -40,8 +40,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
 
         [Column("address_line_2", TypeName = "varchar(128)")]
         public string AddressLine2 { get; set; }
+       
         [Column("city", TypeName = "varchar(128)")]
         public string City { get; set; }
+        
         [Column("district", TypeName = "varchar(128)")]
         public string District { get; set; }
 
@@ -53,6 +55,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
 
         [Column("contct_no", TypeName = "varchar(128)")]
         public required string ContactNo { get; set; }
+
+        [Column("qr_code", TypeName = "varchar(255)")]
+        public string QrCode { get; set; }
 
 
     }
