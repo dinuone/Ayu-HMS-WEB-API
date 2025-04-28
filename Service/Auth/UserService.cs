@@ -188,6 +188,19 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 await dBContext.AddRangeAsync(userBranches);
                 await dBContext.SaveChangesAsync();
 
+                if(request.Role == 3) //doctor
+                {
+                    var doctor = new DoctorModel
+                    {
+                        UserId = newUser.Id,
+                        Specialty = request.Specialty,
+                        DoctorFee = request.DoctorFee
+                    };
+
+                    dBContext.Doctors.Add(doctor);
+                    await dBContext.SaveChangesAsync();
+                }
+
                 await transaction.CommitAsync();
 
                 return new BaseResponse

@@ -34,5 +34,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User
         [JsonPropertyName("is_active")]
         public bool IsActive { get; set; }
 
+        [JsonPropertyName("doctor_fee")]
+        public decimal DoctorFee { get; set; }
+
+        [JsonPropertyName("specialty")]
+        public string Specialty { get; set; }   
+
     }
 }
