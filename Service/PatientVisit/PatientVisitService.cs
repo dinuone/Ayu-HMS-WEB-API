@@ -1,10 +1,15 @@
-﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
+﻿using System.Net;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Microsoft.EntityFrameworkCore;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
 {
-    public class PatientVisitService: IPatientVisitService
+    public class PatientVisitService : IPatientVisitService
     {
         private readonly ApplicationDBContext _context;
         private readonly IHttpContextAccessor httpContextAccessor;
@@ -19,16 +24,128 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             this.localTimeZone = localTimeZone;
         }
 
-        public Task<BaseResponse> Create(AddPatientVisitRequest request)
+        public async Task<BaseResponse> Create(AddPatientVisitRequest request)
         {
-            throw new NotImplementedException();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                var visitExists = await _context.patientVisits.AnyAsync(p =>
+                    p.PatientId == request.PatientId &&
+                    p.ClinicCategoryId == request.ClinicCategoryId &&
+                    p.DoctorId == request.DoctorId &&
+                    p.VisitDate == DateTime.Today &&
+                    p.IsActive == true && p.IsDelete == false);
+
+                if (visitExists)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new
+                        {
+                            Message = "Patient visit already exists for the same doctor and clinic category."
+                        }
+                    };
+                }
+
+                PatientVisitModel newPatientVisit = new PatientVisitModel
+                {
+                    PatientId = request.PatientId,
+                    PatientName = await GetPatientName(request.PatientId),
+
+                    ClinicCategoryId = request.ClinicCategoryId,
+                    ClinicCategoryName = await _context.ClinicCategories
+                        .Where(c => c.Id == request.ClinicCategoryId)
+                        .Select(c => c.Name)
+                        .FirstOrDefaultAsync() ?? "Unknown Clinic Category",
+
+                    ChitNumber = Guid.NewGuid().ToString(), 
+                    Status = PatientVisitStatus.PENDING, 
+                    Remarks = request.Remarks,
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.Now, localTimeZone),
+                    DoctorId = request.DoctorId,
+                    DoctorName = request.DoctorName,
+                    CreatedBy = createdBy,
+
+                };
+
+            
+
+                _context.patientVisits.Add(newPatientVisit);
+                await _context.SaveChangesAsync();
+
+
+
+                //patient log initate
+                long? visitID = newPatientVisit?.Id;
+                //PatientLogModel newPatientLogModel = new PatientLogModel
+                //{
+
+                //} 
+
+                await transaction.CommitAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new
+                    {
+                        Message = "Patient visit created successfully.",
+                      
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while creating patient visit.");
+                await transaction.RollbackAsync();
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        Message = "An error occurred while creating the patient visit."
+                    }
+                };
+            }
+        }
+    
+public async Task<string> GetPatientName(long patientId)
+        {
+            var patientName = await _context.Patients
+                .Where(p => p.Id == patientId)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync();
+
+            if (patientName == null)
+            {
+                return "Unknown Patient";
+            }
+
+            return patientName;
         }
 
+        public async Task<string> GetClinicCategory(int clinicCategoryId)
+        {
+            var clinicCategoryName = await _context.ClinicCategories
+                .Where(c => c.Id == clinicCategoryId)
+                .Select(c => c.Name)
+                .FirstOrDefaultAsync();
+
+            if (clinicCategoryName == null)
+            {
+                return "Unknown Clinic Category";
+            }
+
+            return clinicCategoryName;
+        }
         public Task<BaseResponse> Update(int id, AddPatientVisitRequest request)
         {
             throw new NotImplementedException();
         }
-
 
         public Task<BaseResponse> GetAll(bool IsActive)
         {
@@ -54,10 +171,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         {
             throw new NotImplementedException();
         }
-
-        
-
-       
 
         public Task<BaseResponse> UpdateStatus(int id)
         {
