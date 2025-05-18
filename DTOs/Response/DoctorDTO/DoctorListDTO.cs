@@ -15,6 +15,5 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DoctorDTO
         [JsonPropertyName("user_id")]
         public int UserId { get; set; }
     }
-    {
-    }
+ 
 }
