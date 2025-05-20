@@ -155,7 +155,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                         Data = new { message = "Username already exists" }
                     };
                 }
-
+             
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
                 // Hash password
@@ -194,7 +194,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                     {
                         UserId = newUser.Id,
                         Specialty = request.Specialty,
-                        DoctorFee = request.DoctorFee
+                        DoctorFee = request.DoctorFee,
+                        CreatedBy= createdBy,
                     };
 
                     dBContext.Doctors.Add(doctor);

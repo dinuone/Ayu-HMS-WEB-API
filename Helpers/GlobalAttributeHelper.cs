@@ -50,5 +50,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public static string COMPLETE { get { return "COMPLETE"; } private set { } }
         }
 
+
     }
 }
