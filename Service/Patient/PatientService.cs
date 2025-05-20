@@ -64,7 +64,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     RegistrationNumber = registrationNumber,
                     Age = request.Age,
                     Gender = request.Gender,
-                    PatientType = request.PatientType,
                     ContactNo = request.ContactNo,
                     QrCode = fileUploadResponse.FilePath,
                     Weight = request.Weight,
@@ -131,7 +130,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         Age = patient.Age,
                         Gender = patient.Gender, 
                         ContactNumber = patient.ContactNo, 
-                        PatientType = patient.PatientType,
                         NicNumber = patient.NiceNumber,
                         IsActive = patient.IsActive,
                         CreatedAt = patient.CreatedAt,
@@ -189,7 +187,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Age = patient.Age,
                     Gender = patient.Gender,
                     ContactNo = patient.ContactNo,
-                    PatientType = patient.PatientType,
                     QrCode = patient.QrCode,
                     AddressLine1 = patient.AddressLine1,
                     AddressLine2 = patient.AddressLine2,
@@ -267,7 +264,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 patient.Age = request.Age;
                 patient.NiceNumber = request.NicNumber;
                 patient.ContactNo = request.ContactNo;
-                patient.PatientType = request.PatientType;
                 patient.Gender = request.Gender;
                 patient.Weight = request.Weight;
                 patient.MaritalStatus = request.MaritalStatus;
@@ -436,7 +432,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     RegistrationNumber = data.RegistrationNumber,
                     Age = data.Age,
                     Gender = data.Gender,
-                    PatientType = data.PatientType, 
                     IsActive = data.IsActive,
                     CreatedAt = data.CreatedAt,
                     CreatedBy = data.CreatedBy

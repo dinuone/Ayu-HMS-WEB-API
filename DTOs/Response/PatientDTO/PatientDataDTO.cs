@@ -30,9 +30,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO
         [JsonPropertyName("contact_no")]
         public required string ContactNo { get; set; }
 
-        [JsonPropertyName("patient_type")]
-        public required string PatientType { get; set; }
-
         [JsonPropertyName("qr_code")]
         public string QrCode { get; set; }
 

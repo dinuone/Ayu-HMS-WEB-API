@@ -14,40 +14,37 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
         public required string Gender { get; set; }
 
         [JsonPropertyName("weight")]
-        public int Weight { get; set; }
+        public required int Weight { get; set; }
 
         [JsonPropertyName("marital_status")]
-        public string MaritalStatus { get; set; }
+        public required string MaritalStatus { get; set; }
 
         [JsonPropertyName("occupation")]
-        public string Occupation { get; set; }
+        public string? Occupation { get; set; }
 
         [JsonPropertyName("contact_no")]
         public required string ContactNo { get; set; }
-
-        [JsonPropertyName("patient_type")]
-        public required string PatientType { get; set; }
 
         [JsonPropertyName("qr_code")]
         public required string QrCode { get; set; }
 
         [JsonPropertyName("address_line_1")]
-        public string AddressLine1 { get; set; }
+        public string? AddressLine1 { get; set; }
 
         [JsonPropertyName("address_line_2")]
-        public string AddressLine2 { get; set; }
+        public string? AddressLine2 { get; set; }
 
         [JsonPropertyName("city")]
-        public string City { get; set; }
+        public required string City { get; set; }
 
         [JsonPropertyName("district")]
-        public string District { get; set; }
+        public required string District { get; set; }
 
         [JsonPropertyName("province")]
-        public string Province { get; set; }
+        public required string Province { get; set; }
 
         [JsonPropertyName("nic_number")]
-        public string NicNumber { get; set; }   
+        public required string NicNumber { get; set; }   
 
 
 
