@@ -1,4 +1,6 @@
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Innofactor.EfCoreJsonValueConverter;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
@@ -25,7 +27,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("clinic_category_id")]
         public int ClinicCategoryId { get; set; }
 
-        [Column("treatments")]
+        [JsonField, Column("treatments", TypeName = "json")]
         public List<TreatmentData> Treatment { get; set; }    
 
         [Column("chit_number", TypeName = "varchar(64)")]
