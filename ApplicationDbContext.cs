@@ -39,12 +39,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <ProvinceModel> Provinces { get; set; }
         public DbSet <DistrictModel> Districts { get; set; }
         public DbSet<PatientVisitModel> PatientVisits { get; set; }
-
         public DbSet<DoctorModel> Doctors { get; set; }
         public DbSet<PatientLogModel> PatientLogs { get; set; }
-         
-
-        //public DbSet<PatientLogModel> PatientLogs { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
