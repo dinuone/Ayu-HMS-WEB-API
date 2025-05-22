@@ -50,6 +50,40 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public static string COMPLETE { get { return "COMPLETE"; } private set { } }
         }
 
+        public class PrescriptionAttribute
+        {
+            public int Id { get; set; }
+            public string DrugName { get; set; }
+            public int Qty { get; set; }
+            public string Instructions { get; set; }
+        }
+
+        public class TreatmentsAttribute
+        {
+            public int Id { get; set; }
+            public string TreatmentName { get; set; }
+            public string Instructions { get; set; }
+        }
+
+        public class ClinicAttribute
+        {
+            public int Id { get; set; }
+
+            public string ClinicName { get; set; }
+
+        }
+
+        public class DiagnosisAttribute
+        {
+
+            public int Id { get; set; }
+            public string DiseaseCode { get; set; }
+            public string DiseaseName { get; set; }
+
+            public string Description { get; set; }
+        }
+
+
 
     }
 }

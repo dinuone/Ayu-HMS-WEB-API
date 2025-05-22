@@ -16,12 +16,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         private readonly ILogger<PatientVisitService> logger;
         TimeZoneInfo localTimeZone;
 
-        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger, TimeZoneInfo localTimeZone)
+        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
-            this.localTimeZone = localTimeZone;
+            localTimeZone = TimeZoneInfo.Local;
         }
 
         public async Task<BaseResponse> Create(AddPatientVisitRequest request)

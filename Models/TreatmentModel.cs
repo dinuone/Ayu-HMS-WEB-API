@@ -18,8 +18,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("price")]
         public decimal TreatmentPrice { get; set; }
 
-        [Column("Description")]
-        public string Description { get; set; }
+        //[Column("Description")]
+        //public string Description { get; set; }
 
         [Column("treatment_category_id")]
         public long TreatmentCategoryId { get; set; }
