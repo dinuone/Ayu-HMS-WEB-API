@@ -2,8 +2,10 @@
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Models.Location;
-using Microsoft.AspNetCore.Identity;
+using Innofactor.EfCoreJsonValueConverter;
 using Microsoft.EntityFrameworkCore;
+
+
 
 namespace Harendra_Ayurveda_HMS_WEB_API
 {
@@ -36,9 +38,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <CityModel> Cities { get; set; }
         public DbSet <ProvinceModel> Provinces { get; set; }
         public DbSet <DistrictModel> Districts { get; set; }
+        public DbSet<PatientVisitModel> PatientVisits { get; set; }
 
-        //public DbSet<PatientVisitModel> patientVisits { get; set; }
         public DbSet<DoctorModel> Doctors { get; set; }
+        public DbSet<PatientLogModel> PatientLogs { get; set; }
+         
 
         //public DbSet<PatientLogModel> PatientLogs { get; set; }
 
@@ -53,7 +57,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API
             }
         }
 
-      
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.AddJsonFields();
+        }
+
+
 
     }
 }

@@ -93,7 +93,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Data = new
                     {
                         message = "Patient Created Successfully",
-                        qr_code = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{patient.QrCode}"
+                        qr_code = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{patient.QrCode}",
+                        patient_id = patient.Id,
                     }
                 };
                 return response;
