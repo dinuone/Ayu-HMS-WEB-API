@@ -32,7 +32,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                var visitExists = await _context.patientVisits.AnyAsync(p =>
+                var visitExists = await _context.PatientVisits.AnyAsync(p =>
                     p.PatientId == request.PatientId &&
                     p.ClinicCategoryId == request.ClinicCategoryId &&
                     p.DoctorId == request.DoctorId &&
@@ -54,37 +54,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 PatientVisitModel newPatientVisit = new PatientVisitModel
                 {
                     PatientId = request.PatientId,
-                    PatientName = await GetPatientName(request.PatientId),
-
                     ClinicCategoryId = request.ClinicCategoryId,
-                    ClinicCategoryName = await _context.ClinicCategories
-                        .Where(c => c.Id == request.ClinicCategoryId)
-                        .Select(c => c.Name)
-                        .FirstOrDefaultAsync() ?? "Unknown Clinic Category",
-
                     ChitNumber = Guid.NewGuid().ToString(), 
                     Status = PatientVisitStatus.PENDING, 
                     Remarks = request.Remarks,
                     VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.Now, localTimeZone),
                     DoctorId = request.DoctorId,
-                    DoctorName = request.DoctorName,
                     CreatedBy = createdBy,
-
+                    FeeloAppRef = request.FeeloAppRef,
+                    PatientType = request.PatientType,
+                    Treatment = request.Treatments,
+                    VisitType = request.VisitType
                 };
 
-            
 
-                _context.patientVisits.Add(newPatientVisit);
+                _context.PatientVisits.Add(newPatientVisit);
                 await _context.SaveChangesAsync();
-
-
-
-                //patient log initate
-                long? visitID = newPatientVisit?.Id;
-                //PatientLogModel newPatientLogModel = new PatientLogModel
-                //{
-
-                //} 
 
                 await transaction.CommitAsync();
 
@@ -113,7 +98,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
         }
     
-public async Task<string> GetPatientName(long patientId)
+        public async Task<string> GetPatientName(long patientId)
         {
             var patientName = await _context.Patients
                 .Where(p => p.Id == patientId)
@@ -176,5 +161,8 @@ public async Task<string> GetPatientName(long patientId)
         {
             throw new NotImplementedException();
         }
+
+       
+
     }
 }
