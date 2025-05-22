@@ -1,15 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Innofactor.EfCoreJsonValueConverter;
+﻿using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
+
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
     public class PatientLogModel : BaseEntity
     {
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
@@ -59,5 +63,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
 
         [JsonField, Column("diagnosis", TypeName = "json")]
         public List<DiagnosisAttribute>? Diagnosis { get; set; }
+
     }
 }
