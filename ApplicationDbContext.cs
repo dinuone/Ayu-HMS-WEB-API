@@ -41,6 +41,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet<PatientVisitModel> PatientVisits { get; set; }
         public DbSet<DoctorModel> Doctors { get; set; }
         public DbSet<PatientLogModel> PatientLogs { get; set; }
+        public DbSet<DoctorAssginModel> DoctorAssgins { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

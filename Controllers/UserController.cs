@@ -100,5 +100,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        [Authorize]
+        [HttpGet("doctors-list")]
+        public async Task<IActionResult> DoctorsList()
+        {
+            BaseResponse response = await userService.GetDoctorsList();
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
     }
 }

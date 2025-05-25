@@ -19,6 +19,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
         Task<BaseResponse> GetRoleList();
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> GetBranchList();
+        Task<BaseResponse> GetDoctorsList();
 
 
     }

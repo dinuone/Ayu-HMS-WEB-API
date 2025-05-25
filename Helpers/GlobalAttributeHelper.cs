@@ -38,6 +38,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
         public static class Sequences
         {
             public static string REGISTRATION_SEQUENCE { get { return "REGISTRATION_SEQUENCE"; } private set { } }
+            public static string OPD_SEQUENCE { get { return "OPD_SEQUENCE"; } private set { } }
+            public static string CLINIC_SEQUENCE { get { return "CLINIC_SEQUENCE"; } private set { } }
            
 
 
@@ -88,9 +90,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
       
         public enum PatientVisitTypes
         {
-            OPD =1,
-            Clinic =2,
-            Treatment =3
+            Clinic =1,
+            Treatment =2
         }
 
         public enum PatientType
@@ -130,6 +131,18 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public string DiseaseName { get; set; }
 
             public string Description { get; set; }
+        }
+
+        public class DaysAndShift
+        {
+            public string Day { get; set; }
+            public string Shift { get; set; }
+        }
+
+        public enum AssignUnit
+        {
+            CLINIC = 1,
+            TREATMENTS = 2,
         }
 
     }

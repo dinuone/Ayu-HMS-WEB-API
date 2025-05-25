@@ -11,6 +11,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("title", TypeName = "varchar(128)")]
         public string Title { get; set; }
 
+        [Column("sequence", TypeName = "varchar(128)")]
+        public string Sequence { get; set; }
+
         [Column("start")]
         public long Start { get; set; }
 

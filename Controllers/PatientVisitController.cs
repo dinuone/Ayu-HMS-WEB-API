@@ -5,6 +5,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory;
 using Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
@@ -23,6 +24,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         public async Task<IActionResult> Create(AddPatientVisitRequest request)
         {
             var response = await patientVisitService.Create(request);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("get-available-clinics-or-treatments/{vistiType}")]
+        public async Task<IActionResult> GetAvailableClinicOrTreatments(PatientVisitTypes vistiType)
+        {
+            var response = await patientVisitService.GetAvailableClinicsOrTreatments(vistiType);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
     }
