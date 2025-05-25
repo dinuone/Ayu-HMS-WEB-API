@@ -16,6 +16,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> PatientVisitIds);
         Task<BaseResponse> GetAvailableClinicsOrTreatments(PatientVisitTypes patientVisitType);
+        Task<BaseResponse> GetAvailableDoctorForClinic(long clinicId);
        
 
     }

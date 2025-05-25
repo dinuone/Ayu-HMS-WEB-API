@@ -6,6 +6,7 @@ using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("doctor_assigns")]
     public class DoctorAssginModel : BaseEntity
     {
         [Key]

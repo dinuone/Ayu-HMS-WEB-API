@@ -208,7 +208,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
 
                     // Return clinics available today
                     var clinicQuery = _context.ClinicCategories
-                        .Where(c => !c.IsDelete && c.AvailableDays != null);
+                        .Where(c => !c.IsDelete && c.AvailableDays != null && c.IsActive == true);
 
                     // Materialize the query first to work with in-memory data
                     var clinics = await clinicQuery.ToListAsync();
@@ -244,6 +244,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
         }
 
-     
+        public Task<BaseResponse> GetAvailableDoctorForClinic(long clinicId)
+        {
+            try
+            {
+                
+            }catch(Exception ex)
+            {
+
+
+            }
+        }
     }
 }
