@@ -47,6 +47,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Treatment
                     Name = request.TreatmentName,
                     TreatmentPrice = request.TreatmentPrice,
                     TreatmentCategoryId = request.TreatmentCategoryId,
+                    Description = request.Description,
                     CreatedBy = createdBy,
                 };  
 

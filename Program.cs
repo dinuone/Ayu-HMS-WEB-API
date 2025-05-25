@@ -26,7 +26,11 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.StaticFiles;
 
 using Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit;
+
 using Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog;
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.DoctorAssign;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +65,8 @@ builder.Services.AddScoped<IOffersService, OffersService>();
 builder.Services.AddScoped<ILocationService,LocationService>();
 builder.Services.AddScoped<ISequenceGeneratorService, SequenceGeneratorService>();
 builder.Services.AddScoped<IPatientVisitService, PatientVisitService>();
+builder.Services.AddScoped<IDoctorAssignService, DoctorAssignService>();
+
 
 builder.Services.AddScoped<IPatientLogService, PatientLogService>();
 

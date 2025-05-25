@@ -3,6 +3,7 @@ using Harendra_Ayurveda_HMS_WEB_API;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.Branch;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DoctorDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
@@ -555,6 +556,43 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
                 return response;
             }
             catch (Exception ex)
+            {
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        message = ex.Message
+                    }
+                };
+                return response;
+            }
+        }
+
+        public async Task<BaseResponse> GetDoctorsList()
+        {
+            BaseResponse response;
+            try
+            {
+                List<DoctorListDTO> doctors = await dBContext.Users.Where(u => u.Role == 3 && u.IsDelete == false && u.IsActive == true)
+                    .Select(doctor => new DoctorListDTO
+                    {
+                        Id = doctor.Id,
+                        Name = doctor.FirstName + " " + doctor.LastName,
+                    })
+                .ToListAsync();
+
+
+                response = new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = doctors
+                };
+
+                return response;
+
+            }
+            catch(Exception ex)
             {
                 response = new BaseResponse()
                 {
