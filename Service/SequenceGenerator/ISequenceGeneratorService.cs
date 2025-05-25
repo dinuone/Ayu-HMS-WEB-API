@@ -3,6 +3,7 @@
     public interface ISequenceGeneratorService
     {
 
-        Task<string> GenerateRegistrationNumberAsync(string title);
+        Task<string> GenerateRegistrationNumberAsync();
+        Task<string> GenerateOPDNumberAsync();
     }
 }

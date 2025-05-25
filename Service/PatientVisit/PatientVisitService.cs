@@ -1,10 +1,14 @@
 ﻿using System.Net;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
@@ -16,12 +20,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         private readonly ILogger<PatientVisitService> logger;
         TimeZoneInfo localTimeZone;
 
-        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger, TimeZoneInfo localTimeZone)
+        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
-            this.localTimeZone = localTimeZone;
+            this.localTimeZone = TimeZoneInfo.Local;
         }
 
         public async Task<BaseResponse> Create(AddPatientVisitRequest request)
@@ -162,7 +166,83 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             throw new NotImplementedException();
         }
 
-       
+        public async Task<BaseResponse> GetAvailableClinicsOrTreatments(PatientVisitTypes patientVisitType)
+        {
+            try
+            {
+                if (patientVisitType == PatientVisitTypes.Treatment)
+                {
+                    // Return all treatments (unchanged)
+                    var treatments = await _context.Treatments
+                        .Where(t => !t.IsDelete)
+                        .Select(t => new TreatmentListDTO
+                        {
+                            Id = t.Id,
+                            TreatmentName = t.Name,
+                            TreatmentPrice = t.TreatmentPrice,
+                            
+                        })
+                        .ToListAsync();
 
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.OK,
+                        Data = treatments
+                    };
+                }
+                else // PatientVisitTypes.Clinic
+                {
+                    // Get today's day abbreviation (e.g., "Mon", "Tue")
+                    var todayAbbreviation = DateTime.Now.DayOfWeek switch
+                    {
+                        DayOfWeek.Monday => "Mon",
+                        DayOfWeek.Tuesday => "Tue",
+                        DayOfWeek.Wednesday => "Wed",
+                        DayOfWeek.Thursday => "Thu",
+                        DayOfWeek.Friday => "Fri",
+                        DayOfWeek.Saturday => "Sat",
+                        DayOfWeek.Sunday => "Sun",
+                        _ => string.Empty
+                    };
+
+                    // Return clinics available today
+                    var clinicQuery = _context.ClinicCategories
+                        .Where(c => !c.IsDelete && c.AvailableDays != null);
+
+                    // Materialize the query first to work with in-memory data
+                    var clinics = await clinicQuery.ToListAsync();
+
+                    var availableClinics = clinics
+                        .Where(c => c.AvailableDays.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Contains(todayAbbreviation))
+                        .Select(c => new ClinicCategoryDataDTO
+                        {
+                            Id = c.Id,
+                            ClinicCategoryName = c.Name,
+                            Description = c.Description,
+                            AvailableDays = c.AvailableDays.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        })
+                        .ToList();
+
+
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.OK,
+                        Data = availableClinics
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting available clinics/treatments");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while fetching data." }
+                };
+            }
+        }
+
+     
     }
 }
