@@ -64,5 +64,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [JsonField, Column("diagnosis", TypeName = "json")]
         public List<DiagnosisAttribute>? Diagnosis { get; set; }
 
+        [JsonField, Column("case_sheet", TypeName = "json")]
+        public string? CaseSheet { get; set; }
+
     }
 }
