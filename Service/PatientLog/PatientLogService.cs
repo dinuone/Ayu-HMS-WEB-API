@@ -72,7 +72,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     Treatments = request.Treatments,
                     Clinics = request.Clinics,
                     Diagnosis = request.Diagnosis,
-                    ChitNumber = "12",
+                    ChitNumber = request.ChitNumber,
+                    CaseSheet = JsonConvert.SerializeObject(request.CaseSheet) // Serialize the CaseSheet to JSON string
 
                 };
 
@@ -105,6 +106,71 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             }
         }
 
+        public async Task<BaseResponse> Update(long id, PatientLogCreateRequest request)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var existingLog = await _context.PatientLogs.FirstOrDefaultAsync(p => p.Id == id && p.IsDelete == false);
+
+                if (existingLog == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new
+                        {
+                            Message = "Patient log not found."
+                        }
+                    };
+                }
+
+                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                existingLog.PatientName = request.PatientName;
+                existingLog.VisitId = request.VisitId;
+                existingLog.VisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.VisitDate, localTimeZone);
+                existingLog.Symptoms = request.symptoms;
+                existingLog.Remarks = request.remarks;
+                existingLog.IsAssignedToClinic = request.isAssignedToClinic;
+                existingLog.NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.nextVisitDate, localTimeZone);
+                existingLog.DoctorId = request.DoctorId;
+                existingLog.DoctorName = request.DoctorName;
+                existingLog.Prescription = request.Prescription;
+                existingLog.Treatments = request.Treatments;
+                existingLog.Clinics = request.Clinics;
+                existingLog.Diagnosis = request.Diagnosis;
+                existingLog.UpdatedBy = updatedBy;
+                existingLog.UpdatedAt = DateTime.UtcNow;
+
+                _context.PatientLogs.Update(existingLog);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new
+                    {
+                        Message = "Patient log updated successfully."
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating patient log.");
+                await transaction.RollbackAsync();
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        Message = "An error occurred while updating the patient log."
+                    }
+                };
+            }
+        }
+
         public async Task<BaseResponse> GetAll()
         {
             BaseResponse response;
@@ -129,6 +195,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                         NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(PatientLog.NextVisitDate, localTimeZone),
                         DoctorId = PatientLog.DoctorId,
                         DoctorName = PatientLog.DoctorName,
+                        //Casesheet = JsonConvert.DeserializeObject<string>(PatientLog.CaseSheet), // Deserialize the CaseSheet from JSON string
                         IsActive = PatientLog.IsActive,
                         CreatedAt = PatientLog.CreatedAt,
                         CreatedBy = PatientLog.CreatedBy,
@@ -167,7 +234,36 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             return response;
         }
 
+        public async Task<BaseResponse> GetById(long id)
+        {
+            try
+            {
+                var patientLog = await _context.PatientLogs.FirstOrDefaultAsync(p => p.Id == id && !p.IsDelete);
 
+                if (patientLog == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "Patient log not found" }
+                    };
+                }
 
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = patientLog
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while retrieving the patient log by ID");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
+        }
     }
 }

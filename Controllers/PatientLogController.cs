@@ -31,6 +31,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        [Authorize]
+        [HttpGet("getById/{id}")]
+        public async Task<IActionResult> GetById(long id)
+        {
+            var response = await _patientLogService.GetById(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
 
+        [Authorize]
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(long id, PatientLogCreateRequest request)
+        {
+            var response = await _patientLogService.Update(id, request);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+
+
+        }
     }
 }

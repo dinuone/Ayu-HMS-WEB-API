@@ -36,6 +36,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog
         [JsonPropertyName("next_visit_date")]
         public DateTime nextVisitDate { get; set; }
 
+        [JsonPropertyName("chit_number")]
+        public string ChitNumber { get; set; }
+
 
         [JsonPropertyName("prescription")]
         public List<PrescriptionAttribute> Prescription { get; set; }
@@ -49,6 +52,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog
         [JsonPropertyName("diagnosis")]
         public List<DiagnosisAttribute> Diagnosis { get; set; }
 
+        [JsonPropertyName("casesheet")]
+        public String? CaseSheet { get; set; }
 
 
 

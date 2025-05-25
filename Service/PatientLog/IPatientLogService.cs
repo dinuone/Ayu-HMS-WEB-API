@@ -7,12 +7,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
     public interface IPatientLogService
     {
         Task<BaseResponse> Create(PatientLogCreateRequest request);
-        //Task<BaseResponse> Update(long id, PatientLogCreateRequest request);
-        //Task<BaseResponse> GetById(long id);
+        Task<BaseResponse> Update(long id, PatientLogCreateRequest request);
+        Task<BaseResponse> GetById(long id);
         Task<BaseResponse> GetAll();
-        //Task<BaseResponse> Delete(long id);
-        //Task<BaseResponse> UpdateStatus(long id);
-        //Task<BaseResponse> DeleteAll(List<long> patientLogIds);
-        //Task<BaseResponse> Filter(FilterRequest request);
+      
     }
 }
