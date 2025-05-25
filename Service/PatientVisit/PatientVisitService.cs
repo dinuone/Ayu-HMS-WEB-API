@@ -26,6 +26,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             this.localTimeZone = TimeZoneInfo.Local;
+
         }
 
         public async Task<BaseResponse> Create(AddPatientVisitRequest request)

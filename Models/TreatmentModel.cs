@@ -21,6 +21,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("description")]
         public string? Description { get; set; }
 
+
         [Column("treatment_category_id")]
         public long TreatmentCategoryId { get; set; }
     }
