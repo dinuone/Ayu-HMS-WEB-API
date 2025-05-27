@@ -18,8 +18,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("description", TypeName = "varchar(256)")]
         public string? Description { get; set; }
        
-        [Column("discount_percentage")]
+        [Column("discount_percentage", TypeName ="decimal(16,1)")]
         public decimal DiscountPercentage { get; set; }
+
+        [Column("platform")]
+        public string? Platform { get; set; }
         
         [Column("start_date")]
         public DateTime StartDate { get; set; }

@@ -51,15 +51,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
         [Authorize]
         [HttpGet("list")]
-        public async Task<IActionResult> GetAll(bool IsActive)
+        [HttpGet("list/{isActive}")]
+        public async Task<IActionResult> GetAll(bool isActive = true)
         {
-            var response = await _offerService.GetAll(IsActive);
-            return new JsonResult(response)
-            {
-                StatusCode = response.StatusCode
-            };
+            var response = await _offerService.GetAll(isActive);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        
         [Authorize]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)

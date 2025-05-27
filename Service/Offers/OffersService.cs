@@ -36,23 +36,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
             {
                 string? CreatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"].ToString();
 
-                var treatmentExisits = await _context.Treatments
-                    .AnyAsync(t => t.Id == request.TreatmentId
-                    && t.IsActive == true && t.IsDelete == false);
 
-                if (!treatmentExisits) 
-                {
-                    return new BaseResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.BadRequest,
-                       Data = new 
-                       {
-                           message = "Treatment not found or inactive"
-                       }
-                    };
-                }
-
-                OffersModel offer = new OffersModel
+                OffersModel offer = new()
                 {
                     Name = request.Name,
                     Description = request.Description,
@@ -61,7 +46,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     EndDate = SupportUtils.ConvertUTCDateToLocalDate(request.EndDate, localTimezone),
                     TreatmentId = request.TreatmentId,
                     CreatedBy = CreatedBy,
-                    //CreatedAt =PatientVisitStatus.PENDING
+                    Platform = request.Platform,
+                    IsActive = true
+                   
                 };
 
                 await _context.Offers.AddAsync(offer);
@@ -105,10 +92,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                             Name = offer.Name,
                             Description = offer.Description,
                             DiscountPercentage = offer.DiscountPercentage,
+                            Platform = offer.Platform,
                             StartDate = offer.StartDate,
                             EndDate = offer.EndDate,
                             CreatedBy = offer.CreatedBy,
                             CreatedAt = offer.CreatedAt,
+                            IsActive = offer.IsActive,
                             Treatment = new TreatmentDataDTO
                             {
 
@@ -162,6 +151,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     StartDate = TimeZoneInfo.ConvertTimeFromUtc(offer.StartDate, localTimezone),
                     EndDate = TimeZoneInfo.ConvertTimeFromUtc(offer.EndDate, localTimezone),
                     Treatment = offer.TreatmentId,
+                    Platform = offer.Platform
                 };
 
                 var response = new BaseResponse
@@ -212,6 +202,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                 offer.EndDate = SupportUtils.ConvertUTCDateToLocalDate(request.EndDate, localTimezone);
                 offer.TreatmentId = request.TreatmentId;
                 offer.UpdatedBy = updatedBy;
+                offer.Platform = request.Platform;
 
                 _context.Set<OffersModel>().Update(offer);
                 await _context.SaveChangesAsync();
@@ -375,6 +366,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                     EndDate = data.EndDate,
                     CreatedBy = data.CreatedBy,
                     CreatedAt = data.CreatedAt,
+                    Platform = data.Platform,
                     Treatment = new TreatmentDataDTO
                     {
                         TreatmentName = _context.Treatments.Where(t => t.Id == data.TreatmentId).Select(t => t.Name).FirstOrDefault()

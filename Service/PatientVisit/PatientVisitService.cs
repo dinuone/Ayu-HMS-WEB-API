@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using System.Numerics;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
@@ -244,15 +246,122 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
         }
 
-        public Task<BaseResponse> GetAvailableDoctorForClinic(long clinicId)
+        public async Task<BaseResponse> GetAvailableDoctorsForClinic(long clinicId)
         {
             try
             {
-                
-            }catch(Exception ex)
+                string currentDay = DateTime.Now.DayOfWeek.ToString();;
+
+                List<DoctorAssginModel> doctorAssign = _context.DoctorAssgins
+                   .Where(d => d.AssignedUnit == AssignUnit.CLINIC && d.IsDelete == false && d.IsActive == true) 
+                   .AsEnumerable()
+                         .Where(d => d.ClinicCategories.Any(c => c.Id == clinicId) && 
+                         d.DaysAndShift.Any(ds => ds.Day.Equals(currentDay, StringComparison.OrdinalIgnoreCase)))
+                   .ToList();
+
+                List<AvailableDoctorListDTO> availableDoctorsList = new();
+
+                foreach(var assign in doctorAssign)
+                {
+                    var doctorProfile = await _context.Users
+                         .Where(u => u.Id == assign.DoctorId)
+                         .Join(
+                             _context.Doctors,
+                             user => user.Id,
+                             doctor => doctor.UserId,
+                             (user, doctor) => new {
+                                 User = user,
+                                 Doctor = doctor
+                             }
+                         )
+                         .FirstOrDefaultAsync();
+
+                    AvailableDoctorListDTO mappedData = new AvailableDoctorListDTO()
+                    {
+                        Id = doctorProfile.User.Id,
+                        DoctorName = doctorProfile.User.FirstName + " " + doctorProfile.User.LastName,
+                        AvailableDays = assign.DaysAndShift,
+                        DoctorFee = doctorProfile.Doctor.DoctorFee
+                    };
+
+                    availableDoctorsList.Add( mappedData );
+                }
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = availableDoctorsList
+                };
+            }
+            catch(Exception ex)
             {
 
+                logger.LogError(ex, "Error getting available doctors list");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while fetching doctors list." }
+                };
+            }
+        }
 
+        public async Task<BaseResponse> GetAvailableDoctorsForTreatments(TreatmentIdsRequest request)
+        {
+            try
+            {
+                string currentDay = DateTime.Now.DayOfWeek.ToString();
+
+                List<DoctorAssginModel> doctorAssign = _context.DoctorAssgins
+                   .Where(d => d.AssignedUnit == AssignUnit.TREATMENTS && d.IsDelete == false && d.IsActive == true)
+                   .AsEnumerable() 
+                   .Where(d =>
+                       d.Treatments.Any(t => request.TreatmentIds.Contains(t.Id)) &&
+                       d.DaysAndShift.Any(ds => ds.Day.Equals(currentDay, StringComparison.OrdinalIgnoreCase)))
+                   .ToList();
+
+                List<AvailableDoctorListDTO> availableDoctorsList = new();
+
+                foreach (var assign in doctorAssign)
+                {
+                    var doctorProfile = await _context.Users
+                         .Where(u => u.Id == assign.DoctorId)
+                         .Join(
+                             _context.Doctors,
+                             user => user.Id,
+                             doctor => doctor.UserId,
+                             (user, doctor) => new {
+                                 User = user,
+                                 Doctor = doctor
+                             }
+                         )
+                         .FirstOrDefaultAsync();
+
+                    AvailableDoctorListDTO mappedData = new AvailableDoctorListDTO()
+                    {
+                        Id = doctorProfile.User.Id,
+                        DoctorName = doctorProfile.User.FirstName + " " + doctorProfile.User.LastName,
+                        AvailableDays = assign.DaysAndShift,
+                        DoctorFee = doctorProfile.Doctor.DoctorFee
+                    };
+
+                    availableDoctorsList.Add(mappedData);
+                }
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = availableDoctorsList
+                };
+
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error getting available doctors for treatments");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while doctors for treatments." }
+                };
             }
         }
     }
