@@ -4,6 +4,6 @@
     {
 
         Task<string> GenerateRegistrationNumberAsync();
-        Task<string> GenerateOPDNumberAsync();
+        Task<string> GenerateChitNumberAsync();
     }
 }

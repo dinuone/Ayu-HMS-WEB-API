@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
-namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit
+namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO
 {
     public class AvailableDoctorListDTO
     {

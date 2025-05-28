@@ -3,12 +3,15 @@ using System.Numerics;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
@@ -20,14 +23,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         private readonly ApplicationDBContext _context;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<PatientVisitService> logger;
+        private readonly ISequenceGeneratorService sequenceGeneratorService;
         TimeZoneInfo localTimeZone;
 
-        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger)
+        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger, ISequenceGeneratorService sequenceGeneratorService)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             this.localTimeZone = TimeZoneInfo.Local;
+            this.sequenceGeneratorService = sequenceGeneratorService;
 
         }
 
@@ -39,8 +44,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
+                PatientModel? patient = _context.Patients.Where(p => p.RegistrationNumber == request.PatientRegNo).FirstOrDefault();
+
                 var visitExists = await _context.PatientVisits.AnyAsync(p =>
-                    p.PatientId == request.PatientId &&
+                    p.PatientId == patient.Id &&
                     p.ClinicCategoryId == request.ClinicCategoryId &&
                     p.DoctorId == request.DoctorId &&
                     p.VisitDate == DateTime.Today &&
@@ -58,14 +65,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                     };
                 }
 
+
                 PatientVisitModel newPatientVisit = new PatientVisitModel
                 {
-                    PatientId = request.PatientId,
+                    PatientId = patient.Id,
                     ClinicCategoryId = request.ClinicCategoryId,
-                    ChitNumber = Guid.NewGuid().ToString(), 
+                    ChitNumber = await sequenceGeneratorService.GenerateChitNumberAsync(),
                     Status = PatientVisitStatus.PENDING, 
                     Remarks = request.Remarks,
-                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.Now, localTimeZone),
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.UtcNow, localTimeZone),
                     DoctorId = request.DoctorId,
                     CreatedBy = createdBy,
                     FeeloAppRef = request.FeeloAppRef,
@@ -139,9 +147,81 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             throw new NotImplementedException();
         }
 
-        public Task<BaseResponse> GetAll(bool IsActive)
+        public async Task<BaseResponse> GetAll(bool IsActive)
         {
-            throw new NotImplementedException();
+            BaseResponse response;
+            try
+            {
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false).ToListAsync();
+
+                List<PatientVisitListDTO> patientList = new();
+
+                foreach(var visit in patientVisits)
+                {
+                    PatientDataDTO? patientRecord = GetPatientRecord(visit.PatientId);
+
+                    PatientVisitListDTO record = new PatientVisitListDTO()
+                    {
+                        Id = visit.Id,
+                        ChitNumber = visit.ChitNumber,
+                        NicNumber = patientRecord?.NicNumber,
+                        DoctorName = GetDoctorName(visit.DoctorId),
+                        Status = visit.Status,
+                        PatientName = patientRecord?.Name,
+                        PatientRegNo = patientRecord?.RegistrationNumber,
+                        PatientType = visit.PatientType.ToString(),
+                        VisitDate = visit.VisitDate,
+                        VisitType = visit.VisitType.ToString()
+
+                    };
+
+                    patientList.Add(record);
+                }
+
+                return response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = patientList
+                };
+
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching patient visit-------------------------------------------------."+ex.Message);
+                return response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        Message = "An error occurred while fetching the patient visits."
+                    }
+                };
+            }
+        }
+
+
+
+        private PatientDataDTO? GetPatientRecord(long patientId)
+        {
+            PatientDataDTO? patientData = _context.Patients.Where(p => p.Id == patientId).Select(p => new PatientDataDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                NicNumber = p.NiceNumber,
+                RegistrationNumber = p.RegistrationNumber,
+                Gender = p.Gender,
+                ContactNo = p.ContactNo,
+                Age = p.Age
+            }).FirstOrDefault();
+
+            return patientData;
+        }
+
+        private string GetDoctorName(long doctorId)
+        {
+            var doctor = _context.Users.Where(p => p.Id == doctorId).FirstOrDefault();
+            return doctor.FirstName + " " + doctor.LastName;
+
         }
 
         public Task<BaseResponse> GetById(int id)

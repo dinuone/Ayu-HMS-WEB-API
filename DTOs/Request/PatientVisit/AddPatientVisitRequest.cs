@@ -7,8 +7,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit
 {
     public class AddPatientVisitRequest
     {
-        [JsonPropertyName("patient_id")]
-        public long PatientId { get; set; }
+        [JsonPropertyName("patient_reg_no")]
+        public string PatientRegNo { get; set; }
 
         [JsonPropertyName("clinic_category_id")]
         public int ClinicCategoryId { get; set; }
@@ -27,9 +27,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit
 
         [JsonPropertyName("doctor_id")]
         public long DoctorId { get; set; }
-
-        [JsonPropertyName("doctor_name")]
-        public string? DoctorName { get; set; }
 
         [JsonPropertyName("feelo_app_ref")]
         public string? FeeloAppRef { get; set; }
