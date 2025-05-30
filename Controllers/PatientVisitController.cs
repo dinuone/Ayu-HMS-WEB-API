@@ -1,7 +1,9 @@
 ﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.ClinicCategory;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Patient;
 using Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +59,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         public async Task<IActionResult> GetAll(bool isActive = true)
         {
             var response = await patientVisitService.GetAll(isActive);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("check-account/{nic_number}")]
+        public async Task<IActionResult> CheckAccount(string nic_number)
+        {
+            var response = await patientVisitService.CheckPatientAccount(nic_number);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("get/{id}")]
+        public async Task<IActionResult> GetById(long id)
+        {
+            var response = await patientVisitService.GetById(id);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
     }

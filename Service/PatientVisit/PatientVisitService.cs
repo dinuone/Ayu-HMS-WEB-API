@@ -211,7 +211,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 RegistrationNumber = p.RegistrationNumber,
                 Gender = p.Gender,
                 ContactNo = p.ContactNo,
-                Age = p.Age
+                Age = p.Age,
+                MaritalStatus = p.MaritalStatus,
+                Province = p.Province,
+                AddressLine1 = p.AddressLine1,
+                AddressLine2 = p.AddressLine2,
+                City = p.City,
+                Occupation = p.Occupation,
+                QrCode = p.QrCode,
+                Weight = p.Weight,
+                
             }).FirstOrDefault();
 
             return patientData;
@@ -224,9 +233,53 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
 
         }
 
-        public Task<BaseResponse> GetById(int id)
+        public async Task<BaseResponse> GetById(long id)
         {
-            throw new NotImplementedException();
+            BaseResponse response;
+            try
+            {
+                PatientVisitModel? patientVisit = await _context.PatientVisits.FindAsync(id);
+
+                if (patientVisit == null)
+                {
+                    return response = new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new { message = "invalid patient visit id" }
+
+                    };
+                         
+                }
+
+                PatientVisitDataDTO patientVisitData = new PatientVisitDataDTO();
+                patientVisitData.Id = patientVisit.Id;
+                patientVisitData.ChitNumber = patientVisit.ChitNumber;
+                patientVisitData.ClinicCategory = await GetClinicCategory(patientVisit.ClinicCategoryId);
+                patientVisitData.FeeloAppRef = patientVisit.FeeloAppRef;
+                patientVisitData.DoctorName = GetDoctorName(patientVisit.DoctorId);
+                patientVisitData.Treatments = patientVisit.Treatment;
+                patientVisitData.PatientType = patientVisit.PatientType.ToString();
+                patientVisitData.VisitType = patientVisit.VisitType.ToString();
+                patientVisitData.PatientData = GetPatientRecord(patientVisit.PatientId);
+                patientVisitData.Status = patientVisit.Status;
+                patientVisitData.VisitDate = patientVisit.VisitDate;
+
+
+                return response = new BaseResponse
+                {
+                    StatusCode = (int)(HttpStatusCode.OK),
+                    Data = patientVisitData
+                };
+
+            }catch(Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while check patient visit data get by id ----------------------------------------------------------");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while fetching visit data" }
+                };
+            }
         }
 
         public Task<BaseResponse> Delete(int id)
@@ -441,6 +494,40 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new { message = "An error occurred while doctors for treatments." }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> CheckPatientAccount(string nicNumber)
+        {
+            try
+            {
+                PatientModel? patient = await _context.Patients.FirstOrDefaultAsync(c => c.NiceNumber == nicNumber);
+                CheckAccountDTO account = new CheckAccountDTO();
+                if (patient != null)
+                {
+                    account.AccountExisit = true;
+                    account.PatientRegNo = patient.RegistrationNumber;
+                }
+                else
+                {
+                    account.AccountExisit = false;
+                }
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = account
+                };
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while check patient account ----------------------------------------------------------");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while updating patient status" }
                 };
             }
         }

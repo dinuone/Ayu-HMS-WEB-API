@@ -3,6 +3,7 @@ using System.Net;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
@@ -496,6 +497,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             }
         }
 
-       
+        
     }
 }
