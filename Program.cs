@@ -30,6 +30,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog;
 
 using Harendra_Ayurveda_HMS_WEB_API.Service.DoctorAssign;
+using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
 
 
 
@@ -49,6 +50,8 @@ var serverVersion = new MySqlServerVersion(ServerVersion.Parse(version));
 GlobalAttributeHelper.fileUploadSettings = builder.Configuration.GetSection("FileUploadSettings").Get<GlobalAttributeHelper.FileUploadSettings>();
 
 GlobalAttributeHelper.mySqlConfiguration.connectionString = connectionString;
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 // Add services to the container.
 builder.Services.AddScoped<IUserService, UserService>();
@@ -66,9 +69,10 @@ builder.Services.AddScoped<ILocationService,LocationService>();
 builder.Services.AddScoped<ISequenceGeneratorService, SequenceGeneratorService>();
 builder.Services.AddScoped<IPatientVisitService, PatientVisitService>();
 builder.Services.AddScoped<IDoctorAssignService, DoctorAssignService>();
-
-
 builder.Services.AddScoped<IPatientLogService, PatientLogService>();
+
+
+
 
 
 
@@ -128,7 +132,7 @@ builder.Services.AddCors(options =>
                           .AllowCredentials());
 });
 
-builder.Services.AddHttpContextAccessor();
+
 
 var app = builder.Build();
 

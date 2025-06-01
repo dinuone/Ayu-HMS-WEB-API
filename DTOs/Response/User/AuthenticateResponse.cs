@@ -15,7 +15,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User
             this.message = message;
         }
 
-        public AuthenticateResponse(UserModel user, string token, HttpStatusCode status)
+        public AuthenticateResponse(UserModel user, string role, string token, HttpStatusCode status)
         {
             var data = new
             {
@@ -24,6 +24,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User
                 user.LastName,
                 UserName = user.Username,
                 Token = token,
+                role = role
             };
 
             GenerateResponse(data, status);

@@ -12,6 +12,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
+using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
@@ -25,14 +26,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         private readonly ILogger<PatientVisitService> logger;
         private readonly ISequenceGeneratorService sequenceGeneratorService;
         TimeZoneInfo localTimeZone;
+        private readonly IUserContext userContext;
 
-        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger, ISequenceGeneratorService sequenceGeneratorService)
+        public PatientVisitService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<PatientVisitService> logger, ISequenceGeneratorService sequenceGeneratorService, IUserContext userContext)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             this.localTimeZone = TimeZoneInfo.Local;
             this.sequenceGeneratorService = sequenceGeneratorService;
+            this.userContext = userContext;
 
         }
 
@@ -214,11 +217,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 Age = p.Age,
                 MaritalStatus = p.MaritalStatus,
                 Province = p.Province,
+                Region = p.District,
                 AddressLine1 = p.AddressLine1,
                 AddressLine2 = p.AddressLine2,
                 City = p.City,
                 Occupation = p.Occupation,
-                QrCode = p.QrCode,
+                QrCode = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{p.QrCode}",
                 Weight = p.Weight,
                 
             }).FirstOrDefault();
@@ -528,6 +532,57 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new { message = "An error occurred while updating patient status" }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> GetPatientVisitListForDoctor()
+        {
+            BaseResponse response;
+            try
+            {
+                long loggedInUserId = userContext.UserId;
+
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId  && p.Status == PatientVisitStatus.PENDING).ToListAsync();
+
+                List<PatientVisitListDTO> patientList = new();
+
+                foreach (var visit in patientVisits)
+                {
+                    PatientDataDTO? patientRecord = GetPatientRecord(visit.PatientId);
+
+                    PatientVisitListDTO record = new PatientVisitListDTO()
+                    {
+                        Id = visit.Id,
+                        ChitNumber = visit.ChitNumber,
+                        NicNumber = patientRecord?.NicNumber,
+                        DoctorName = GetDoctorName(visit.DoctorId),
+                        Status = visit.Status,
+                        PatientName = patientRecord?.Name,
+                        PatientRegNo = patientRecord?.RegistrationNumber,
+                        PatientType = visit.PatientType.ToString(),
+                        VisitDate = visit.VisitDate,
+                        VisitType = visit.VisitType.ToString()
+
+                    };
+
+                    patientList.Add(record);
+                }
+
+                return response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = patientList
+                };
+
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error getting patient visit list for doctor");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while getting patient visit list for doctor." }
                 };
             }
         }
