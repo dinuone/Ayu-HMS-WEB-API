@@ -10,7 +10,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         Task<BaseResponse> Create(AddPatientVisitRequest request);
         Task<BaseResponse> Update(int id, AddPatientVisitRequest request);
         Task<BaseResponse> Delete(int id);
-        Task<BaseResponse> GetById(int id);
+        Task<BaseResponse> GetById(long id);
         Task<BaseResponse> GetAll(bool IsActive);
         Task<BaseResponse> Filter(FilterRequest request);
         Task<BaseResponse> UpdateStatus(int id);
@@ -18,7 +18,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         Task<BaseResponse> GetAvailableClinicsOrTreatments(PatientVisitTypes patientVisitType);
         Task<BaseResponse> GetAvailableDoctorsForClinic(long clinicId);
         Task<BaseResponse> GetAvailableDoctorsForTreatments(TreatmentIdsRequest request);
-       
-
+        Task<BaseResponse> CheckPatientAccount(string nicNumber);
+        Task<BaseResponse> GetPatientVisitListForDoctor();
+ 
     }
 }

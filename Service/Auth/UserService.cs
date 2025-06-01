@@ -61,7 +61,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
             // authentication successful so generate jwt token
             var token = await generateJwtToken(user);
 
-            return new AuthenticateResponse(user, token, HttpStatusCode.OK);
+            string role = dBContext.Roles.Where(r => r.Id == user.Role).Select(r => r.Name).FirstOrDefault();
+
+            return new AuthenticateResponse(user, role, token, HttpStatusCode.OK);
 
         }
 

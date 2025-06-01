@@ -1,3 +1,5 @@
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using System.Text.Json.Serialization;
 
@@ -8,17 +10,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit
         [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonPropertyName("patient_id")]
-        public long PatientId { get; set; }
-
-        [JsonPropertyName("patient_reg_no")]
-        public string PatientRegNo { get; set; }
-
-        [JsonPropertyName("patient_name")]
-        public string PatientName { get; set; }
-
-        [JsonPropertyName("nic_number")]
-        public string NicNumber { get; set; }
+        [JsonPropertyName("patient_data")]
+        public PatientDataDTO? PatientData { get; set; }
 
         [JsonPropertyName("visit_date")]
         [JsonConverter(typeof(JsonDateConverter))]
@@ -38,5 +31,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit
 
         [JsonPropertyName("doctor_name")]
         public string? DoctorName { get; set; }
+
+        [JsonPropertyName("treatments")]
+        public List<TreatmentData> Treatments { get; set; }
+
+        [JsonPropertyName("clinic_category")]
+        public string? ClinicCategory { get; set; }
+
+        [JsonPropertyName("feelo_app_ref")]
+        public string? FeeloAppRef { get; set; }
+             
+
     }
 }

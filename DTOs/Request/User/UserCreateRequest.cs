@@ -38,7 +38,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User
         public decimal DoctorFee { get; set; }
 
         [JsonPropertyName("specialty")]
-        public string Specialty { get; set; }   
+        public string? Specialty { get; set; }   
 
     }
 }

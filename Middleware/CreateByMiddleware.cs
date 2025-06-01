@@ -13,20 +13,27 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Check if the user is authenticated
             if (context.User.Identity.IsAuthenticated)
             {
-                // Get the user ID from the claims (this should be set by your authentication provider)
                 var usernameClaim = context.User.FindFirst(ClaimTypes.Name);
+                var userIdClaim = context.User.FindFirst("id");
 
-                if (usernameClaim != null)
+                if (usernameClaim != null && userIdClaim != null)
                 {
-                    // Store the user ID (CreatedBy) in the HttpContext items
                     context.Items["CreatedBy"] = usernameClaim.Value;
+
+                    // Parse to long before storing
+                    if (long.TryParse(userIdClaim.Value, out long authId))
+                    {
+                        context.Items["authId"] = authId; // Now stored as long
+                    }
+                    else
+                    {
+                        // Handle invalid ID format
+                        throw new UnauthorizedAccessException("Invalid user ID format");
+                    }
                 }
             }
-
-            // Call the next middleware in the pipeline
             await _next(context);
         }
     }
