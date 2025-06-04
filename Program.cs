@@ -126,10 +126,14 @@ builder.Services.AddSwaggerGen(swagger =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "https://harendra-ayu-hms.cadvex.com")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
+    builder => builder
+        .WithOrigins(
+            "http://localhost:8080",
+            "https://harendra-ayu-hms-uat.cadvex.com"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 
