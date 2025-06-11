@@ -2,7 +2,11 @@
 using System.Runtime.CompilerServices;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
@@ -258,6 +262,55 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while retrieving the patient log by ID");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> GetMasterDataForPatientLog()
+        {
+            try
+            {
+                var diseaseCodes = await _context.DiseaseCodes
+                    .Where(p => !p.IsDelete && p.IsActive)
+                    .Select(p => new DiseaseCodeNameListDTO { Id = p.Id, Name = p.DiseaseName })
+                    .ToListAsync();
+
+                var drugs = await _context.Drugs
+                    .Where(p => !p.IsDelete && p.IsActive)
+                    .Select(p => new DrugNameListDTO { Id = p.Id, Name = p.Name })
+                    .ToListAsync();
+
+                var treatments = await _context.Treatments
+                    .Where(p => !p.IsDelete && p.IsActive)
+                    .Select(p => new TreatmentNameListDTO { Id = p.Id, Name = p.Name })
+                    .ToListAsync();
+
+                var clinics = await _context.ClinicCategories
+                    .Where(p => !p.IsDelete && p.IsActive)
+                    .Select(p => new ClinicNameListDTO { Id = p.Id, Name = p.Name })
+                    .ToListAsync();
+
+                var response = new MasterDataDTO
+                {
+                    DiseaseCodes = diseaseCodes,
+                    Drugs = drugs,
+                    Treatments = treatments,
+                    Clinics = clinics
+                };
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = response
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error fetching master data for patient log");
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,

@@ -48,5 +48,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
 
         }
+
+        [Authorize]
+        [HttpGet("get-master-data")]
+        public async Task<IActionResult> GetMasterData()
+        {
+            var response = await _patientLogService.GetMasterDataForPatientLog();
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
     }
 }
