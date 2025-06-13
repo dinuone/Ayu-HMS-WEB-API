@@ -543,13 +543,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             {
                 long loggedInUserId = userContext.UserId;
 
-                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId  && p.Status == PatientVisitStatus.PENDING).ToListAsync();
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId  && p.Status == PatientVisitStatus.PENDING && p.VisitDate.Date == DateTime.Today).ToListAsync();
 
                 List<PatientVisitListDTO> patientList = new();
 
                 foreach (var visit in patientVisits)
                 {
                     PatientDataDTO? patientRecord = GetPatientRecord(visit.PatientId);
+
+                    
 
                     PatientVisitListDTO record = new PatientVisitListDTO()
                     {

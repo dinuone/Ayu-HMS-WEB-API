@@ -67,7 +67,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Gender = request.Gender,
                     ContactNo = request.ContactNo,
                     QrCode = fileUploadResponse.FilePath,
-                    Weight = request.Weight,
+                    //Weight = request.Weight,
                     MaritalStatus = request.MaritalStatus,
                     Occupation = request.Occupation,
                     AddressLine1 = request.AddressLine1,
@@ -195,7 +195,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     City = patient.City,
                     Region = patient.District,
                     Province = patient.Province,
-                    Weight = patient.Weight,
+                    //Weight = patient.Weight,
                     MaritalStatus = patient.MaritalStatus,
                     Occupation = patient.Occupation,
                     NicNumber = patient.NiceNumber
@@ -267,7 +267,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 patient.NiceNumber = request.NicNumber;
                 patient.ContactNo = request.ContactNo;
                 patient.Gender = request.Gender;
-                patient.Weight = request.Weight;
+                //patient.Weight = request.Weight;
                 patient.MaritalStatus = request.MaritalStatus;
                 patient.Occupation = request.Occupation;
                 patient.AddressLine1 = request.AddressLine1;
