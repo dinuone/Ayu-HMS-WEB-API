@@ -67,7 +67,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Gender = request.Gender,
                     ContactNo = request.ContactNo,
                     QrCode = fileUploadResponse.FilePath,
-                    //Weight = request.Weight,
                     MaritalStatus = request.MaritalStatus,
                     Occupation = request.Occupation,
                     AddressLine1 = request.AddressLine1,

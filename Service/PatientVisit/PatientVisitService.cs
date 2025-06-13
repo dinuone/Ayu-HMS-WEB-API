@@ -223,7 +223,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 City = p.City,
                 Occupation = p.Occupation,
                 QrCode = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{p.QrCode}",
-                Weight = p.Weight,
                 
             }).FirstOrDefault();
 
