@@ -10,6 +10,7 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
@@ -22,13 +23,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<IPatientLogService> logger;
         TimeZoneInfo localTimeZone;
+        private readonly IUserContext userContext;
 
-        public PatientLogService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<IPatientLogService> logger)
+        public PatientLogService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<IPatientLogService> logger, IUserContext userContext)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             localTimeZone = TimeZoneInfo.Local;
+            this.userContext = userContext;
         }
 
         public async Task<BaseResponse> Create(PatientLogCreateRequest request)
@@ -38,37 +41,55 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                var logExists = await _context.PatientLogs.AnyAsync(p =>
-                    p.PatientId == request.PatientId &&
-                    p.VisitId == request.VisitId &&
-                    p.VisitDate == DateTime.Today &&
-                    p.IsActive == true && p.IsDelete == false);
+                long loggedInUserId = userContext.UserId;
+                //var logExists = await _context.PatientLogs.AnyAsync(p =>
+                //    p.PatientId == request.PatientId &&
+                //    p.VisitId == request.VisitId &&
+                //    p.VisitDate == DateTime.Today &&
+                //    p.IsActive == true && p.IsDelete == false);
 
-                if (logExists)
+                //if (logExists)
+                //{
+                //    return new BaseResponse
+                //    {
+                //        StatusCode = (int)HttpStatusCode.BadRequest,
+                //        Data = new
+                //        {
+                //            Message = "Patient log already exists for the same patient and visit date."
+                //        }
+                //    };
+                //}
+
+
+                var patientData = _context.Patients.Where(p => p.RegistrationNumber == request.PatientRegNo).FirstOrDefault();
+
+                if(patientData == null)
                 {
                     return new BaseResponse
                     {
                         StatusCode = (int)HttpStatusCode.BadRequest,
                         Data = new
                         {
-                            Message = "Patient log already exists for the same patient and visit date."
+                            Message = "Invalid patient register number"
                         }
                     };
+
                 }
+
+                var doctor = _context.Users.Where(u => u.Id == loggedInUserId).FirstOrDefault();
 
                 var newPatientLog = new PatientLogModel
                 {
-                    PatientId = request.PatientId,
-                    PatientName = request.PatientName,
+                    PatientId = patientData.Id,
+                    PatientName = patientData.Name,
                     VisitId = request.VisitId,
-                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.VisitDate, localTimeZone),
-                    Symptoms = request.symptoms,
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.UtcNow, localTimeZone),
                     Remarks = request.remarks,
                     IsAssignedToClinic = request.isAssignedToClinic,
                     NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.nextVisitDate, localTimeZone),
                     CreatedBy = createdBy,
-                    DoctorId = request.DoctorId,
-                    DoctorName = request.DoctorName,
+                    DoctorId = loggedInUserId,
+                    DoctorName = doctor.FirstName + " " + doctor.LastName,
                     IsActive = true,
                     IsDelete = false,
                     CreatedAt = DateTime.UtcNow,
@@ -110,70 +131,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             }
         }
 
-        public async Task<BaseResponse> Update(long id, PatientLogCreateRequest request)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
-            {
-                var existingLog = await _context.PatientLogs.FirstOrDefaultAsync(p => p.Id == id && p.IsDelete == false);
-
-                if (existingLog == null)
-                {
-                    return new BaseResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.NotFound,
-                        Data = new
-                        {
-                            Message = "Patient log not found."
-                        }
-                    };
-                }
-
-                string? updatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
-
-                existingLog.PatientName = request.PatientName;
-                existingLog.VisitId = request.VisitId;
-                existingLog.VisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.VisitDate, localTimeZone);
-                existingLog.Symptoms = request.symptoms;
-                existingLog.Remarks = request.remarks;
-                existingLog.IsAssignedToClinic = request.isAssignedToClinic;
-                existingLog.NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(request.nextVisitDate, localTimeZone);
-                existingLog.DoctorId = request.DoctorId;
-                existingLog.DoctorName = request.DoctorName;
-                existingLog.Prescription = request.Prescription;
-                existingLog.Treatments = request.Treatments;
-                existingLog.Clinics = request.Clinics;
-                existingLog.Diagnosis = request.Diagnosis;
-                existingLog.UpdatedBy = updatedBy;
-                existingLog.UpdatedAt = DateTime.UtcNow;
-
-                _context.PatientLogs.Update(existingLog);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new BaseResponse
-                {
-                    StatusCode = (int)HttpStatusCode.OK,
-                    Data = new
-                    {
-                        Message = "Patient log updated successfully."
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error occurred while updating patient log.");
-                await transaction.RollbackAsync();
-                return new BaseResponse
-                {
-                    StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Data = new
-                    {
-                        Message = "An error occurred while updating the patient log."
-                    }
-                };
-            }
-        }
+        
 
         public async Task<BaseResponse> GetAll()
         {
