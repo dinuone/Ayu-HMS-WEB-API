@@ -11,7 +11,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
         Task<BaseResponse> GetById(long id);
         Task<BaseResponse> GetAll();
         Task<BaseResponse> GetMasterDataForPatientLog();
-       
-      
+
+        
+
+
     }
 }
