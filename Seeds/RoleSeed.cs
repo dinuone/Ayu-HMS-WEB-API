@@ -28,7 +28,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Seeds
                     },
                        new RoleModel
                     {
-                        Name = "Ticketing Officer",
+                        Name = "Coordinator",
                     },
 
                      new RoleModel
