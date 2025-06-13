@@ -1,17 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.RatesDTO;
+using Microsoft.EntityFrameworkCore;
 
-namespace BookInventory.Helpers
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
     public class GlobalAttributeHelper
     {
         public static MySqlConfiguration mySqlConfiguration = new MySqlConfiguration();
         public static AppSettings appSettings = new AppSettings();
+        public static FileUploadSettings fileUploadSettings = new FileUploadSettings();
 
         public partial class MySqlConfiguration
         {
             public string connectionString;
             public MySqlServerVersion dbVersion;
         }
+
+
+
         public partial class AppSettings
         {
             public string Product;
@@ -23,6 +28,116 @@ namespace BookInventory.Helpers
             public double TokenRefreshDuration;
             public double AgentUploadAttachmentCount;
             public double HoldAttachmentCount;
+           
+        }
+
+        public partial class FileUploadSettings
+        {
+            public string BaseUrl { get; set; }
+        }
+
+        public static class Sequences
+        {
+            public static string REGISTRATION_SEQUENCE { get { return "REGISTRATION_SEQUENCE"; } private set { } }
+            public static string OPD_SEQUENCE { get { return "OPD_SEQUENCE"; } private set { } }
+            public static string CLINIC_SEQUENCE { get { return "CLINIC_SEQUENCE"; } private set { } }
+            public static string INVOICE_SEQUENCE { get { return "INVOICE_SEQUENCE"; } private set { } }
+           
+
+
+        }
+
+        public class PatientVisitStatus
+        {
+            public static string PENDING { get { return "PENDING"; } private set { } }
+            public static string ONGOING { get { return "ONGOING"; } private set { } }
+            public static string PENDING_PAYMENT { get { return "PENDING-PAYMENT"; } private set { } }
+            public static string COMPLETE { get { return "COMPLETE"; } private set { } }
+        }
+
+        public class PrescriptionAttribute
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+            public int qty { get; set; }
+            public string instruction { get; set; }
+            public string duration { get; set; }
+        }
+
+        public class TreatmentsAttribute
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+        }
+
+        public class ClinicAttribute
+        {
+            public int id { get; set; }
+
+            public string name { get; set; }
+
+        }
+
+        public class DiagnosisAttribute
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+        }
+
+        public class InvoiceDescription
+        {
+            public List<PrescriptionAttribute> Prescription { get; set; }
+
+            public List<TreatmentsAttribute> Treatments { get; set; }
+
+            public List<ClinicAttribute> Clinics { get; set; }
+
+            public List<DiagnosisAttribute> Diagnosis { get; set; }
+
+            public RatesDataDTO Rates { get; set; }
+
+        }
+
+        public class SubTotal
+        {
+            public decimal HospitalCharge { get; set; }
+            public decimal CustomCharge { get; set; }
+            public decimal TreatmentCharge { get; set; }
+            public decimal PrescriptionCost { get; set; }
+        }
+
+
+
+        public enum PatientVisitTypes
+        {
+            Clinic =1,
+            Treatment =2
+        }
+
+        public enum PatientType
+        {
+            Feelo = 1,
+            Normal =2,
+        }
+
+        public enum PaymentMethod
+        {
+            Card =1,
+            Cash=2
+        }
+
+        
+
+        public class DaysAndShift
+        {
+            public string Day { get; set; }
+            public string Shift { get; set; }
+        }
+
+        public enum AssignUnit
+        {
+            CLINIC = 1,
+            TREATMENTS = 2,
         }
 
     }

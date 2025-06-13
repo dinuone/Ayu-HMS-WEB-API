@@ -1,0 +1,20 @@
+﻿
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.TreatmentCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
+
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory
+{
+    public interface ITreatmentCategoryService
+    {
+        Task<BaseResponse> Create(AddTreatmentCategoryRequest request);
+        Task<BaseResponse> Update(int id, AddTreatmentCategoryRequest request);
+        Task<BaseResponse> GetById(int id);
+        Task<BaseResponse> GetAll(bool IsActive);
+        Task<BaseResponse> Delete(int id);
+        Task<BaseResponse> UpdateStatus(int id);
+        Task<BaseResponse> DeleteAll(List<int> treatmentCtgIds);
+        Task<BaseResponse> Filter(FilterRequest request);
+    }
+}

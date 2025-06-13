@@ -1,12 +1,38 @@
-using BookInventory;
-using BookInventory.Helpers;
-using BookInventory.Service.Auth;
+
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Serilog;
 using Microsoft.OpenApi.Models;
-using BookInventory.Middleware;
-using BookInventory.Service.Product;
+
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.Branch;
+
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
+using Harendra_Ayurveda_HMS_WEB_API;
+using Harendra_Ayurveda_HMS_WEB_API.Middleware;
+using Harendra_Ayurveda_HMS_WEB_API.Service.TreatmentCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.ClinicCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.DiseaseCode;
+using Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Treatment;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Patient;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Drug;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Rates;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Offers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
+using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit;
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog;
+
+using Harendra_Ayurveda_HMS_WEB_API.Service.DoctorAssign;
+using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,14 +47,35 @@ builder.Logging.AddSerilog(logger);
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
 var version = builder.Configuration.GetConnectionString("MySqlVersion");
 var serverVersion = new MySqlServerVersion(ServerVersion.Parse(version));
+GlobalAttributeHelper.fileUploadSettings = builder.Configuration.GetSection("FileUploadSettings").Get<GlobalAttributeHelper.FileUploadSettings>();
 
 GlobalAttributeHelper.mySqlConfiguration.connectionString = connectionString;
-
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 // Add services to the container.
-builder.Services.AddScoped<IUserService , UserService>();
-builder.Services.AddScoped<IProductService, ProductService>();  
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<ITreatmentCategoryService, TreatmentCategoryService>();
+builder.Services.AddScoped<IClinicCategoryService, ClinicCategoryService>();
+builder.Services.AddScoped<IDiseaseCodeService,DiseaseCodeService >();
+builder.Services.AddScoped<IDrugCategoryService, DrugCategoryService>();
+builder.Services.AddScoped<IDrugService, DrugService>();
+builder.Services.AddScoped<ITreatmentService, TreatmentService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IRatesService, RatesService>();
+builder.Services.AddScoped<IOffersService, OffersService>();
+builder.Services.AddScoped<ILocationService,LocationService>();
+builder.Services.AddScoped<ISequenceGeneratorService, SequenceGeneratorService>();
+builder.Services.AddScoped<IPatientVisitService, PatientVisitService>();
+builder.Services.AddScoped<IDoctorAssignService, DoctorAssignService>();
+builder.Services.AddScoped<IPatientLogService, PatientLogService>();
+
+
+
+
+
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -75,26 +122,37 @@ builder.Services.AddSwaggerGen(swagger =>
                 });
 });
 
-
-
 // Configure CORS
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
+    builder => builder
+        .WithOrigins(
+            "http://localhost:8080",
+            "https://harendra-ayu-hms-uat.cadvex.com"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
-
-builder.Services.AddHttpContextAccessor();
 
 
 var app = builder.Build();
 
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
 
+var provider = new FileExtensionContentTypeProvider();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/Uploads",
+    ContentTypeProvider = provider
+}); ;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -116,9 +174,9 @@ app.UseAuthorization();
 
 app.UseMiddleware<JwtMiddleware>();
 
+app.UseMiddleware<CreateByMiddleware>();
+
 app.MapControllers();
-
-
 
 // Create Db tables if not exists
 using (var scope = app.Services.CreateScope())
@@ -130,7 +188,6 @@ using (var scope = app.Services.CreateScope())
     app.CreateDatabase(dbContext);
 
     DbSeeder.Seed(Assembly.GetEntryAssembly(), dbContext);
-
 }
 
 app.Run();

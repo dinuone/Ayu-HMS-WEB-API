@@ -1,10 +1,11 @@
-﻿using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using Harendra_Ayurveda_HMS_WEB_API;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookInventory.Seeds
 {
-    public class RoleSeed : IDbSeeder
+    public class UserSeed : IDbSeeder
     {
         public void Initialize(DbContext dbContext)
         {
@@ -18,27 +19,18 @@ namespace BookInventory.Seeds
 
                 var users = new List<UserModel>
                 {
-                    new UserModel
+                   new UserModel
                     {
-                        Username ="admin",
+                        Username = "admin",
                         Password = hashPassword,
                         Email = "admin@gmail.com",
-                        Role = "Admin",
-                        isActive = true,
+                        Role = 1,
+                        IsActive = true,
                         FirstName = "super",
                         LastName = "admin",
+                        CreatedBy = "system"
                     },
 
-                    new UserModel
-                    {
-                        Username ="user123",
-                        Password = hashPassword,
-                        Email = "user@gmail.com",
-                        Role = "Cashier",
-                        isActive = true,
-                        FirstName = "test",
-                        LastName = "user",
-                    },
                  };
 
 

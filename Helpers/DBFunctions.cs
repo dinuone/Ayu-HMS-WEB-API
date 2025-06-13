@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace BookInventory.Helpers
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
     public static class DBFunctions
     {
-        private static List<string> dbFunctions;
+        private static List<string>? dbFunctions;
         public static WebApplication CreateDatabase(this WebApplication webApplication, DbContext context)
         {
             // Check if dbFunctions is not empty before executing

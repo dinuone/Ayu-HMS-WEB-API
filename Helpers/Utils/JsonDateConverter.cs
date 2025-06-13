@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BookInventory.Helpers.Utils
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils
 {
     public class JsonDateConverter : JsonConverter<DateTime>
     {

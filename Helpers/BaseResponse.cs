@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace BookInventory.Helpers
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
     public class BaseResponse
     {

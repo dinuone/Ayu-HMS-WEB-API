@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace BookInventory.Helpers.Utils
+namespace Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils
 {
     public class SupportUtils
     {
@@ -21,6 +21,11 @@ namespace BookInventory.Helpers.Utils
             Random random = new Random();
 
             return random.Next(1000, 9999).ToString();
+        }
+
+        public static DateTime ConvertUTCDateToLocalDate(DateTime utcDate, TimeZoneInfo localTimeZone)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDate, localTimeZone);
         }
     }
 }

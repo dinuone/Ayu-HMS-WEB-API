@@ -1,17 +1,26 @@
-﻿using BookInventory.DTOs.Request.Auth;
-using BookInventory.DTOs.Request.User;
-using BookInventory.DTOs.Response.User;
-using BookInventory.Helpers;
-using BookInventory.Models;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.User;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Models;
 
-namespace BookInventory.Service.Auth
+namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
 {
     public interface IUserService
     {
         Task<AuthenticateResponse> Authenticate(AuthenticateRequest request);
         Task<BaseResponse> Create(UserCreateRequest request);
         Task<BaseResponse> List();
-        Task<UserModel?> GetById(int id);
+        Task<BaseResponse> GetById(int id);
+        Task<BaseResponse> Update(int id, UserUpdateRequest request);
+        Task<BaseResponse> Delete(int id);
+        Task<BaseResponse> DeleteAll(List<int> userIds);
+        Task<BaseResponse> ChangePassword(ChangePasswordRequest request);
+        Task<BaseResponse> GetRoleList();
+        Task<BaseResponse> UpdateStatus(int id);
+        Task<BaseResponse> GetBranchList();
+        Task<BaseResponse> GetDoctorsList();
+
 
     }
 }

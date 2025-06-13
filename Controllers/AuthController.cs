@@ -1,11 +1,12 @@
-﻿using BookInventory.DTOs.Request.Auth;
-using BookInventory.DTOs.Response.User;
-using BookInventory.Helpers;
-using BookInventory.Service.Auth;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.Auth;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.User;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Service.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
-namespace BookInventory.Controllers
+namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 {
     [Route("api/auth")]
     [ApiController]
@@ -24,7 +25,17 @@ namespace BookInventory.Controllers
 
             AuthenticateResponse response = await userService.Authenticate(request);
 
-            return response.ToActionResult();
+            if (response.GetMessage() != null)
+            {
+                var msg = response.GetMessage();
+
+                var resp = new BaseResponse();
+                resp.GenerateResponse(new { message = msg }, HttpStatusCode.BadRequest);
+
+                return new JsonResult(resp) { StatusCode = 400 };
+            }
+
+           return response.ToActionResult();
         }
     }
 }

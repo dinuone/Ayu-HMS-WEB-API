@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BookInventory.Models
+namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
-    public class UserModel
+    [Table("users")]
+    public class UserModel : BaseEntity
     {
         [Key]
         [Column("id")]
@@ -22,16 +23,14 @@ namespace BookInventory.Models
         public required string Username { get; set; }
 
         [Column("password", TypeName ="varchar(128)")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Column("role")]
-        public string Role { get; set; }
+        public long Role { get; set; }
 
-        [Column("is_active")]
-        public bool isActive { get; set; }
+        [Column("is_initial_password")]
+        public bool IsInitialPassword { get; set; }
 
-        [Column("created_at")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
+
     }
 }
