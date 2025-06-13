@@ -24,12 +24,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <UserModel> Users { get; set; }
         public DbSet <BranchModel> Branches { get; set; }
         public DbSet <TreatmentCategoryModel> TreatmentCategories { get; set; }
-        public DbSet<UserBranchModel> UserBranches { get; set; }
+        public DbSet <UserBranchModel> UserBranches { get; set; }
         public DbSet <ClinicCategoryModel> ClinicCategories { get; set; }
         public DbSet <TreatmentModel> Treatments { get; set; }
         public DbSet <DiseaseCodeModel> DiseaseCodes { get; set; }
         public DbSet <DrugCategoryModel> DrugCategories { get; set; }
-        public DbSet<DrugModel> Drugs { get; set; }
+        public DbSet <DrugModel> Drugs { get; set; }
         public DbSet <PatientModel> Patients { get; set; }
         public DbSet <RoleModel> Roles { get; set; }
         public DbSet <RatesModel> Rates { get; set; }
@@ -38,10 +38,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <CityModel> Cities { get; set; }
         public DbSet <ProvinceModel> Provinces { get; set; }
         public DbSet <DistrictModel> Districts { get; set; }
-        public DbSet<PatientVisitModel> PatientVisits { get; set; }
-        public DbSet<DoctorModel> Doctors { get; set; }
-        public DbSet<PatientLogModel> PatientLogs { get; set; }
-        public DbSet<DoctorAssginModel> DoctorAssgins { get; set; }
+        public DbSet <PatientVisitModel> PatientVisits { get; set; }
+        public DbSet <DoctorModel> Doctors { get; set; }
+        public DbSet <PatientLogModel> PatientLogs { get; set; }
+        public DbSet <DoctorAssginModel> DoctorAssgins { get; set; }
+        public DbSet <InvoiceModel> Invoice { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

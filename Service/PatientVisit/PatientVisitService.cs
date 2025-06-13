@@ -3,6 +3,7 @@ using System.Numerics;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.InvoiceDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO;
@@ -266,6 +267,32 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 patientVisitData.PatientData = GetPatientRecord(patientVisit.PatientId);
                 patientVisitData.Status = patientVisit.Status;
                 patientVisitData.VisitDate = patientVisit.VisitDate;
+
+
+                //get invoice 
+                InvoiceModel? invoice = _context.Invoice.Where(inv => inv.VisitId == patientVisit.Id).FirstOrDefault();
+
+                if(invoice != null)
+                {
+                    var doctor = _context.Users.Where(u => u.Id == invoice.DoctorId).FirstOrDefault();
+
+                    PatientLogModel? patientLog = _context.PatientLogs.Where(pl => pl.VisitId == patientVisit.Id).FirstOrDefault();
+
+                    patientVisitData.Invoice = new InvoiceDataDTO
+                    {
+                        InvoiceNo = invoice.InvoiceNo,
+                        DoctorName = doctor.FirstName + " " + doctor.LastName,
+                        DoctorFee = invoice.DoctorFee,
+                        SubTotal = invoice.SubTotal,
+                        InvoiceDescription = invoice.InvoiceDescription,
+                        PatientData = GetPatientRecord(patientVisit.PatientId),
+                        TotalAmount = invoice.TotalAmount,
+                        Treatments = patientLog.Treatments,
+                        Clinics =  patientLog.Clinics,
+                        CreatedAt = invoice.CreatedAt,
+                        
+                    };
+                }
 
 
                 return response = new BaseResponse

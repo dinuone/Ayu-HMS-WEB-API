@@ -5,5 +5,6 @@
 
         Task<string> GenerateRegistrationNumberAsync();
         Task<string> GenerateChitNumberAsync();
+        Task<string> GenerateInvoiceNumberAsync(string regNumber);
     }
 }
