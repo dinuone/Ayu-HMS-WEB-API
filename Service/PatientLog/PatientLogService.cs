@@ -6,10 +6,12 @@ using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.RatesDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
+using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
 using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -24,14 +26,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
         private readonly ILogger<IPatientLogService> logger;
         TimeZoneInfo localTimeZone;
         private readonly IUserContext userContext;
+        private readonly ISequenceGeneratorService sequenceGeneratorService;
 
-        public PatientLogService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<IPatientLogService> logger, IUserContext userContext)
+        public PatientLogService(ApplicationDBContext context, IHttpContextAccessor httpContextAccessor, ILogger<IPatientLogService> logger, IUserContext userContext, ISequenceGeneratorService sequenceGeneratorService)
         {
             _context = context;
             this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             localTimeZone = TimeZoneInfo.Local;
             this.userContext = userContext;
+            this.sequenceGeneratorService = sequenceGeneratorService;
         }
 
         public async Task<BaseResponse> Create(PatientLogCreateRequest request)
@@ -42,23 +46,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
                 long loggedInUserId = userContext.UserId;
-                //var logExists = await _context.PatientLogs.AnyAsync(p =>
-                //    p.PatientId == request.PatientId &&
-                //    p.VisitId == request.VisitId &&
-                //    p.VisitDate == DateTime.Today &&
-                //    p.IsActive == true && p.IsDelete == false);
-
-                //if (logExists)
-                //{
-                //    return new BaseResponse
-                //    {
-                //        StatusCode = (int)HttpStatusCode.BadRequest,
-                //        Data = new
-                //        {
-                //            Message = "Patient log already exists for the same patient and visit date."
-                //        }
-                //    };
-                //}
 
 
                 var patientData = _context.Patients.Where(p => p.RegistrationNumber == request.PatientRegNo).FirstOrDefault();
@@ -98,12 +85,120 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     Clinics = request.Clinics,
                     Diagnosis = request.Diagnosis,
                     ChitNumber = request.ChitNumber,
-                    CaseSheet = JsonConvert.SerializeObject(request.CaseSheet) // Serialize the CaseSheet to JSON string
+                    CaseSheet = request.CaseSheet
 
                 };
 
                 await _context.PatientLogs.AddAsync(newPatientLog);
                 await _context.SaveChangesAsync();
+
+                var doctroProfile = _context.Doctors.Where(doc => doc.UserId == doctor.Id).FirstOrDefault();
+
+                //get Hsotpital Charge
+
+                RatesModel rates = _context.Rates.First();
+
+                if(rates == null)
+                {
+                    await transaction.RollbackAsync();
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new
+                        {
+                            Message = "please configure the rates"
+                        }
+                    };
+                }
+
+                //cal hospital charge + custom charges
+                decimal hospitalCharge = rates.HospitalCharge;
+
+                var customCharges = JsonConvert.DeserializeObject<Dictionary<string, decimal>>(rates.CustomCharges);
+                decimal customChargesTotal = customCharges?.Values.Sum() ?? 0;
+
+                decimal totalHospitalCharge = hospitalCharge + customChargesTotal;
+
+                //cal prescription cost
+                var prescriptionDruglist = request.Prescription.Select(p => p.id).ToList();
+
+                List<DrugModel> drugs = await _context.Drugs.Where(d => prescriptionDruglist.Contains(d.Id)).ToListAsync();
+
+                decimal totalPrescriptionCost = request.Prescription.Sum(pres =>
+                {
+                    var drug = drugs.FirstOrDefault(d => d.Name == pres.name);
+                    return drug != null ? drug.UnitPrice * pres.qty : 0;
+                });
+
+
+
+                //cal treatment chargest
+                var today = DateTime.UtcNow.Date;
+
+                var treatmentIds = request.Treatments.Select(t => t.id).ToList();
+
+                var treatments = await _context.Treatments.Where(t => treatmentIds.Contains(t.Id)).ToListAsync();
+                
+                var offers = await _context.Offers.Where(o => treatmentIds.Contains(o.TreatmentId) && o.StartDate <= today && o.EndDate >= today).ToListAsync();
+
+                decimal totalTreatmentCost = 0;
+
+                foreach (var treatment in treatments)
+                {
+                    var offer = offers.FirstOrDefault(o => o.TreatmentId == treatment.Id);
+
+                    decimal finalPrice = treatment.TreatmentPrice;
+
+                    if (offer != null)
+                    {
+                        decimal discountAmount = (offer.DiscountPercentage / 100m) * treatment.TreatmentPrice;
+                        finalPrice -= discountAmount;
+                    }
+
+                    totalTreatmentCost += finalPrice;
+                }
+
+
+                var newInvoice = new InvoiceModel
+                {
+                    InvoiceNo = await sequenceGeneratorService.GenerateInvoiceNumberAsync(patientData.RegistrationNumber),
+                    VisitId = request.VisitId,
+                    PatientId = patientData.Id,
+                    DoctorId = loggedInUserId,
+                    DoctorFee = doctroProfile.DoctorFee,
+                    TotalAmount = totalHospitalCharge +  totalPrescriptionCost + totalTreatmentCost + doctroProfile.DoctorFee,
+                    InvoiceDescription = new InvoiceDescription
+                    {
+                        Prescription = request.Prescription,
+                        Treatments = request.Treatments,
+                        Clinics = request.Clinics,
+                        Diagnosis = request.Diagnosis,
+                        Rates = new RatesDataDTO
+                        {
+                            CustomCharge = rates.CustomCharges,
+                            HospitalCharge = rates.HospitalCharge,
+                        }
+                        
+                    },
+                    SubTotal = new SubTotal
+                    {
+                        CustomCharge = customChargesTotal,
+                        HospitalCharge = rates.HospitalCharge,
+                        PrescriptionCost = totalPrescriptionCost,
+                        TreatmentCharge = totalTreatmentCost
+                    },
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _context.Invoice.AddAsync(newInvoice);
+                await _context.SaveChangesAsync();
+
+
+                PatientVisitModel? patientVisit = _context.PatientVisits.Where(pv => pv.Id == request.VisitId).FirstOrDefault();
+                patientVisit.Status = PatientVisitStatus.PENDING_PAYMENT;
+                await _context.SaveChangesAsync();
+
+
                 await transaction.CommitAsync();
 
                 return new BaseResponse
@@ -118,7 +213,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error occurred while creating patient log.");
+                logger.LogError(ex, "Error occurred while creating patient log ----------------------------------------");
                 await transaction.RollbackAsync();
                 return new BaseResponse
                 {
@@ -151,7 +246,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                         PatientName = PatientLog.PatientName,
                         VisitId = PatientLog.VisitId,
                         VisitDate = SupportUtils.ConvertUTCDateToLocalDate(PatientLog.VisitDate, localTimeZone),
-                        Symptoms = PatientLog.Symptoms,
                         Remarks = PatientLog.Remarks,
                         IsAssignedToClinic = PatientLog.IsAssignedToClinic,
                         NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(PatientLog.NextVisitDate, localTimeZone),
@@ -165,12 +259,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                         // Fix: Serialize the List<Prescription> to JSON string before deserialization
 
 
-                        Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(PatientLog.Prescription)),
+                        Prescription = PatientLog.Prescription,
 
 
-                        Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(PatientLog.Treatments)),
-                        Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(PatientLog.Clinics)),
-                        Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(PatientLog.Diagnosis))
+                        Treatments = PatientLog.Treatments,
+                        Clinics = PatientLog.Clinics,
+                        Diagnosis = PatientLog.Diagnosis
                     });
                 }
 

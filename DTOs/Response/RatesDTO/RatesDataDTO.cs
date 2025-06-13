@@ -4,6 +4,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.RatesDTO
 {
     public class RatesDataDTO
     {
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+
         [JsonPropertyName("hospital_charge")]
         public decimal HospitalCharge { get; set; }
 
