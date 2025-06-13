@@ -52,6 +52,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 DrugModel drug = new DrugModel
                 {
                     Name = request.DrugName,
+                    DrugCode = request.DrugCode,
                     Brand = request.Brand,
                     Description = request.Description,
                     UnitPrice = request.UnitPrice,
@@ -107,6 +108,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
 
                 string? updatedBy = httpContextAccessor.HttpContext?.Items["UpdatedBy"]?.ToString();
                 drug.Name = request.DrugName;
+                drug.DrugCode = request.DrugCode;
                 drug.Brand = request.Brand;
                 drug.Description = request.Description;
                 drug.UnitPrice = request.UnitPrice;
@@ -157,6 +159,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     {
                         drug.Id,
                         drug.Name,
+                        drug.DrugCode,
                         drug.Brand,
                         drug.Description,
                         drug.UnitPrice,
@@ -185,6 +188,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 {
                     Id = drug.Id,
                     DrugName = drug.Name,
+                    DrugCode = drug.DrugCode,
                     Brand = drug.Brand,
                     Description = drug.Description,
                     UnitPrice = drug.UnitPrice,
@@ -224,6 +228,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                         {
                             Id = drug.Id,
                             DrugName = drug.Name,
+                            DrugCode = drug.DrugCode,
                             Brand = drug.Brand,
                             Description = drug.Description,
                             UnitPrice = drug.UnitPrice,

@@ -26,8 +26,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("gender", TypeName = "varchar(64)")]
         public required string Gender { get; set; }
 
-        [Column("weight")]
-        public int Weight { get; set; }
+        //due to request weight is commented out
+
+        //[Column("weight")]
+        //public int Weight { get; set; }
 
         [Column("marital_status", TypeName = "varchar(128)")]
         public string? MaritalStatus { get; set; }

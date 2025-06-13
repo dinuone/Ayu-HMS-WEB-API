@@ -69,6 +69,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Seeds
                     new() { Name = "Dehiwala-Mount Lavinia", DistrictId = 1 },
                     new() { Name = "Moratuwa", DistrictId = 1 },
                     new() { Name = "Kotte", DistrictId = 1 },
+                    //need to add these new cities for colombo added in the word file,
                     new() { Name = "Nugegoda", DistrictId = 1 },
                     new() { Name = "Negombo", DistrictId = 2 },
                     new() { Name = "Gampaha", DistrictId = 2 },

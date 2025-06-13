@@ -18,8 +18,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO
         [JsonPropertyName("gender")]
         public required string Gender { get; set; }
 
-        [JsonPropertyName("weight")]
-        public int Weight { get; set; }
+        //[JsonPropertyName("weight")]
+        //public int Weight { get; set; }
 
         [JsonPropertyName("marital_status")]
         public string MaritalStatus { get; set; }

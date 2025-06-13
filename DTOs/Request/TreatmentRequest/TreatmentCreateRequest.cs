@@ -14,6 +14,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.TreatmentRequest
         public long TreatmentCategoryId { get; set; }
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }
