@@ -587,5 +587,65 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 };
             }
         }
+
+        public async Task<BaseResponse> GetPatientVisitsByPatientId(long patientId)
+        {
+            try
+            {
+                var patientVisits = await _context.PatientVisits
+                    .Where(p => p.PatientId == patientId && p.IsDelete == false)
+                    .ToListAsync();
+
+                if (patientVisits == null || !patientVisits.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { Message = "No visits found for the specified patient." }
+                    };
+                }
+
+                List<PatientVisitListDTO> visitList = new();
+
+                foreach (var visit in patientVisits)
+                {
+                    var patientRecord = GetPatientRecord(visit.PatientId);
+
+                    var record = new PatientVisitListDTO
+                    {
+                        Id = visit.Id,
+                        ChitNumber = visit.ChitNumber,
+                        NicNumber = patientRecord?.NicNumber,
+                        DoctorName = GetDoctorName(visit.DoctorId),
+                        Status = visit.Status,
+                        PatientName = patientRecord?.Name,
+                        PatientRegNo = patientRecord?.RegistrationNumber,
+                        PatientType = visit.PatientType.ToString(),
+                        VisitDate = visit.VisitDate,
+                        VisitType = visit.VisitType.ToString()
+                    };
+
+                    visitList.Add(record);
+                }
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = visitList
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching patient visits by patient id.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { Message = "An error occurred while fetching the patient visits." }
+                };
+            }
+        }
+
+
+
     }
 }
