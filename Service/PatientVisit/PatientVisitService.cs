@@ -621,6 +621,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             {
                 var patientVisits = await _context.PatientVisits
                     .Where(p => p.PatientId == patientId && p.IsDelete == false)
+                    .OrderByDescending(p => p.VisitDate) // Latest first
                     .ToListAsync();
 
                 if (patientVisits == null || !patientVisits.Any())
@@ -671,6 +672,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 };
             }
         }
+
 
 
 
