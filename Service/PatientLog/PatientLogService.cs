@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics.Eventing.Reader;
+using System.Net;
 using System.Runtime.CompilerServices;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
@@ -50,7 +51,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
 
                 var patientData = _context.Patients.Where(p => p.RegistrationNumber == request.PatientRegNo).FirstOrDefault();
 
-                if(patientData == null)
+                if (patientData == null)
                 {
                     return new BaseResponse
                     {
@@ -226,7 +227,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             }
         }
 
-        
+
 
         public async Task<BaseResponse> GetAll()
         {
@@ -367,6 +368,125 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                     Data = new { message = ex.Message }
+                };
+            }
+        }
+
+
+
+        public async Task<BaseResponse> GetPatientLogByVisitId(long visitId)
+        {
+            try
+            {
+                var patientLogs = await _context.PatientLogs
+                .Where(pl => pl.VisitId == visitId && !pl.IsDelete)
+                .ToListAsync();
+                    if (patientLogs == null || !patientLogs.Any())
+                    {
+                        return new BaseResponse
+                        {
+                            StatusCode = (int)HttpStatusCode.NotFound,
+                            Data = new { Message = "No patient logs found for the specified visit ID." }
+                        };
+                    }
+
+                // Optionally map to DTOs if you have a PatientLogListDTO or similar
+                var logList = patientLogs.Select(pl => new PatientLogListDTO
+                {
+                    Id = pl.Id,
+                    PatientId = pl.PatientId,
+                    PatientName = pl.PatientName,
+                    VisitId = pl.VisitId,
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
+                    Remarks = pl.Remarks,
+                    IsAssignedToClinic = pl.IsAssignedToClinic,
+                    NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.NextVisitDate, localTimeZone),
+                    DoctorId = pl.DoctorId,
+                    DoctorName = pl.DoctorName,
+                    IsActive = pl.IsActive,
+                    CreatedAt = pl.CreatedAt,
+                    CreatedBy = pl.CreatedBy,
+                    Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(pl.Prescription)),
+                    Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(pl.Treatments)),
+                    Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
+                    Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
+                    CaseSheet = pl.CaseSheet,
+                }).ToList();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = logList
+                };
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex, "Error occurred while fetching patient logs by visit ID.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { Message = "An error occurred while fetching the patient logs." }
+                };
+            }
+        }
+
+        
+
+        public async Task<BaseResponse> GetPatientLogListByPatientId(long patientId) 
+        {
+
+            try
+            {
+                var patientLogs = await _context.PatientLogs
+                    .Where(pl => pl.PatientId == patientId && !pl.IsDelete)
+                    .ToListAsync();
+
+                if (patientLogs == null || !patientLogs.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { Message = "No patient logs found for the specified patient ID." }
+                    };
+                }
+
+                var logList = patientLogs.Select(pl => new PatientLogListDTO
+                {
+                    Id = pl.Id,
+                    PatientId = pl.PatientId,
+                    PatientName = pl.PatientName,
+                    VisitId = pl.VisitId,
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
+                    Remarks = pl.Remarks,
+                    IsAssignedToClinic = pl.IsAssignedToClinic,
+                    NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.NextVisitDate, localTimeZone),
+                    DoctorId = pl.DoctorId,
+                    DoctorName = pl.DoctorName,
+                    IsActive = pl.IsActive,
+                    CreatedAt = pl.CreatedAt,
+                    CreatedBy = pl.CreatedBy,
+                    Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(pl.Prescription)),
+                    Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(pl.Treatments)),
+                    Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
+                    Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
+                    CaseSheet = pl.CaseSheet,
+                }).ToList();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = logList
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching patient logs by patient ID.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { Message = "An error occurred while fetching the patient logs." }
                 };
             }
         }

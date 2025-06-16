@@ -39,7 +39,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
-      
+
 
         [Authorize]
         [HttpGet("get-master-data")]
@@ -49,5 +49,21 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        [Authorize]
+        [HttpGet("get-patient-log-by-visit-id/{visitId}")]
+        public async Task<IActionResult> GetPatientLogByVisitId(long visitId)
+        {
+            var response = await _patientLogService.GetPatientLogByVisitId(visitId);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("get-patient-log-list-by-patient-id/{patientId}")]
+        public async Task<IActionResult> GetPatientLogListByPatientId(long patientId)
+        {
+            var response = await _patientLogService.GetPatientLogListByPatientId(patientId);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+
+        }
     }
 }
