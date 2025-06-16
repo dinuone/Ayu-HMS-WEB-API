@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.RatesDTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 {
@@ -40,6 +41,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public static string REGISTRATION_SEQUENCE { get { return "REGISTRATION_SEQUENCE"; } private set { } }
             public static string OPD_SEQUENCE { get { return "OPD_SEQUENCE"; } private set { } }
             public static string CLINIC_SEQUENCE { get { return "CLINIC_SEQUENCE"; } private set { } }
+            public static string INVOICE_SEQUENCE { get { return "INVOICE_SEQUENCE"; } private set { } }
            
 
 
@@ -49,6 +51,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
         {
             public static string PENDING { get { return "PENDING"; } private set { } }
             public static string ONGOING { get { return "ONGOING"; } private set { } }
+            public static string PENDING_PAYMENT { get { return "PENDING-PAYMENT"; } private set { } }
             public static string COMPLETE { get { return "COMPLETE"; } private set { } }
         }
 
@@ -58,6 +61,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public string name { get; set; }
             public int qty { get; set; }
             public string instruction { get; set; }
+            public string duration { get; set; }
         }
 
         public class TreatmentsAttribute
@@ -80,9 +84,30 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
             public string name { get; set; }
         }
 
+        public class InvoiceDescription
+        {
+            public List<PrescriptionAttribute> Prescription { get; set; }
+
+            public List<TreatmentsAttribute> Treatments { get; set; }
+
+            public List<ClinicAttribute> Clinics { get; set; }
+
+            public List<DiagnosisAttribute> Diagnosis { get; set; }
+
+            public RatesDataDTO Rates { get; set; }
+
+        }
+
+        public class SubTotal
+        {
+            public decimal HospitalCharge { get; set; }
+            public decimal CustomCharge { get; set; }
+            public decimal TreatmentCharge { get; set; }
+            public decimal PrescriptionCost { get; set; }
+        }
 
 
-      
+
         public enum PatientVisitTypes
         {
             Clinic =1,
@@ -93,6 +118,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
         {
             Feelo = 1,
             Normal =2,
+        }
+
+        public enum PaymentMethod
+        {
+            Card =1,
+            Cash=2
         }
 
         

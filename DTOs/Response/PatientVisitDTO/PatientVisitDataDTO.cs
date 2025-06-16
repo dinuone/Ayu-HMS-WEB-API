@@ -1,4 +1,5 @@
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.InvoiceDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using System.Text.Json.Serialization;
@@ -40,6 +41,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisit
 
         [JsonPropertyName("feelo_app_ref")]
         public string? FeeloAppRef { get; set; }
+
+        [JsonPropertyName("invoice")]
+        public InvoiceDataDTO Invoice {get;set;}
              
 
     }

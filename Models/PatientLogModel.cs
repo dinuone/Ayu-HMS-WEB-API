@@ -31,9 +31,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("patient_name")]
         public string PatientName { get; set; }
 
-        [Column("symptoms")]
-        public string Symptoms { get; set; }
-
         [Column("doctor_id")]
         public long DoctorId { get; set; }
 

@@ -106,5 +106,57 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator
             return $"{year}{monthLetter}{sequence.Current:D4}";
         }
 
+        public async Task<string> GenerateInvoiceNumberAsync(string regNumber)
+        {
+            var now = DateTime.UtcNow;
+            var year = now.ToString("yy"); // 2-digit year
+            var month = now.Month;
+            var sequenceTitle = $"INVOICE-{year}-{month}"; // Unique key per month
+
+
+            try
+            {
+                var sequence = await _dbContext.Sequences
+                    .FirstOrDefaultAsync(s => s.Title == sequenceTitle);
+
+                if (sequence == null)
+                {
+                    sequence = new SequenceDataModel
+                    {
+                        Title = sequenceTitle,
+                        Sequence = Sequences.INVOICE_SEQUENCE,
+                        Start = 1,
+                        Current = 1,
+                        End = 9999,
+                        Increment = 1,
+                        created_at = now,
+                        updated_at = now
+                    };
+                    _dbContext.Sequences.Add(sequence);
+                }
+                else
+                {
+                    if (sequence.Current >= sequence.End)
+                    {
+                        throw new InvalidOperationException("Monthly invoice number limit reached");
+                    }
+
+                    sequence.Current += sequence.Increment;
+                    sequence.updated_at = now;
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+
+                return $"INV-{regNumber}-{year}-{month:D2}-{sequence.Current:D4}";
+            }
+            catch
+            {
+           
+                throw;
+            }
+        }
+
+
     }
 }

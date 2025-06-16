@@ -85,5 +85,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             var response = await patientVisitService.GetPatientVisitListForDoctor();
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
+
+
+        [Authorize]
+        [HttpGet("get-by-patient/{patientId}")]
+        public async Task<IActionResult> GetPatientVisitsByPatientId(long patientId)
+        {
+            var response = await patientVisitService.GetPatientVisitsByPatientId(patientId);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
     }
 }
