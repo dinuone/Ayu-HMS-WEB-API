@@ -579,7 +579,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
             catch(Exception ex)
             {
-                logger.LogError(ex, "Error getting patient visit list for doctor");
+                logger.LogError(ex, "Error getting patient visit list for doctor------------------------------------------------------------------------------------");
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
