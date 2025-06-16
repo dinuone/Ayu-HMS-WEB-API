@@ -47,8 +47,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO
         [JsonPropertyName("clinics")]
         public List<ClinicAttribute> Clinics { get; set; }
 
-        [JsonPropertyName("diagnosis")]
+        [JsonPropertyName("diease_code")]
         public List<DiagnosisAttribute> Diagnosis { get; set; }
+
+        [JsonPropertyName("case_sheet")]
+        public string CaseSheet { get; set; }   
 
 
 
