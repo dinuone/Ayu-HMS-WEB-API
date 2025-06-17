@@ -156,7 +156,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             BaseResponse response;
             try
             {
-                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false).ToListAsync();
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false).OrderByDescending(p => p.VisitDate).ToListAsync();
 
                 List<PatientVisitListDTO> patientList = new();
 
@@ -585,7 +585,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         ChitNumber = visit.ChitNumber,
                         NicNumber = patientRecord?.NicNumber,
                         DoctorName = GetDoctorName(visit.DoctorId),
-                        Status = visit.Status,
+                        Status = visit.Status == PatientVisitStatus.PENDING_PAYMENT ? "COMPLETED" : "PENDING",
                         PatientName = patientRecord?.Name,
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),
@@ -645,7 +645,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         ChitNumber = visit.ChitNumber,
                         NicNumber = patientRecord?.NicNumber,
                         DoctorName = GetDoctorName(visit.DoctorId),
-                        Status = visit.Status,
+                        Status = visit.Status == PatientVisitStatus.PENDING_PAYMENT ? "COMPLETED" : "PENDING",
                         PatientName = patientRecord?.Name,
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),

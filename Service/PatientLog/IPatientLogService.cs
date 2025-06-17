@@ -1,5 +1,4 @@
-﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
-using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog

@@ -1,11 +1,8 @@
-﻿using System.Diagnostics.Eventing.Reader;
-using System.Net;
-using System.Runtime.CompilerServices;
-using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
-using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.ClinicCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DiseaseCodeDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.RatesDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentDTO;
@@ -16,6 +13,7 @@ using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
 using Harendra_Ayurveda_HMS_WEB_API.Service.UserContext;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Net;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
@@ -86,7 +84,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     Clinics = request.Clinics,
                     Diagnosis = request.Diagnosis,
                     ChitNumber = request.ChitNumber,
-                    CaseSheet = request.CaseSheet
+                    CaseSheet = request.CaseSheet,
+                    CaseSheetType = request.CaseSheetType
 
                 };
 
@@ -244,7 +243,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     {
                         Id = PatientLog.Id,
                         PatientId = PatientLog.PatientId,
-                        PatientName = PatientLog.PatientName,
+                        PatientData = GetPatientRecord(PatientLog.PatientId),
                         VisitId = PatientLog.VisitId,
                         VisitDate = SupportUtils.ConvertUTCDateToLocalDate(PatientLog.VisitDate, localTimeZone),
                         Remarks = PatientLog.Remarks,
@@ -381,21 +380,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                 var patientLogs = await _context.PatientLogs
                 .Where(pl => pl.VisitId == visitId && !pl.IsDelete)
                 .ToListAsync();
-                    if (patientLogs == null || !patientLogs.Any())
-                    {
-                        return new BaseResponse
-                        {
-                            StatusCode = (int)HttpStatusCode.NotFound,
-                            Data = new { Message = "No patient logs found for the specified visit ID." }
-                        };
-                    }
+                  
 
                 // Optionally map to DTOs if you have a PatientLogListDTO or similar
-                var logList = patientLogs.Select(pl => new PatientLogListDTO
+                PatientLogListDTO? patientLog = patientLogs.Select(pl => new PatientLogListDTO
                 {
                     Id = pl.Id,
                     PatientId = pl.PatientId,
-                    PatientName = pl.PatientName,
+                    PatientData = GetPatientRecord(pl.PatientId),
+                    ChitNumber = pl.ChitNumber,
                     VisitId = pl.VisitId,
                     VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
                     Remarks = pl.Remarks,
@@ -411,12 +404,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
                     Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
                     CaseSheet = pl.CaseSheet,
-                }).ToList();
+                    CaseSheetType = pl.CaseSheetType
+                }).FirstOrDefault();
 
                 return new BaseResponse
                 {
                     StatusCode = (int)HttpStatusCode.OK,
-                    Data = logList
+                    Data = patientLog
                 };
 
             }
@@ -432,7 +426,31 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             }
         }
 
-        
+        private PatientDataDTO? GetPatientRecord(long patientId)
+        {
+            PatientDataDTO? patientData = _context.Patients.Where(p => p.Id == patientId).Select(p => new PatientDataDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                NicNumber = p.NiceNumber,
+                RegistrationNumber = p.RegistrationNumber,
+                Gender = p.Gender,
+                ContactNo = p.ContactNo,
+                Age = p.Age,
+                MaritalStatus = p.MaritalStatus,
+                Province = p.Province,
+                Region = p.District,
+                AddressLine1 = p.AddressLine1,
+                AddressLine2 = p.AddressLine2,
+                City = p.City,
+                Occupation = p.Occupation,
+                QrCode = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{p.QrCode}",
+
+            }).FirstOrDefault();
+
+            return patientData;
+        }
+
 
         public async Task<BaseResponse> GetPatientLogListByPatientId(long patientId) 
         {
@@ -443,20 +461,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     .Where(pl => pl.PatientId == patientId && !pl.IsDelete)
                     .ToListAsync();
 
-                if (patientLogs == null || !patientLogs.Any())
-                {
-                    return new BaseResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.NotFound,
-                        Data = new { Message = "No patient logs found for the specified patient ID." }
-                    };
-                }
+               
 
                 var logList = patientLogs.Select(pl => new PatientLogListDTO
                 {
                     Id = pl.Id,
                     PatientId = pl.PatientId,
-                    PatientName = pl.PatientName,
+                    ChitNumber = pl.ChitNumber,
+                    PatientData = GetPatientRecord(pl.PatientId),
                     VisitId = pl.VisitId,
                     VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
                     Remarks = pl.Remarks,
@@ -472,6 +484,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
                     Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
                     CaseSheet = pl.CaseSheet,
+                    CaseSheetType = pl.CaseSheetType
                 }).ToList();
 
                 return new BaseResponse

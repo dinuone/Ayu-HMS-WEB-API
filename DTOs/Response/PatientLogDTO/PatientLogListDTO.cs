@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
+using System.Text.Json.Serialization;
 using static Harendra_Ayurveda_HMS_WEB_API.Helpers.GlobalAttributeHelper;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO
@@ -17,8 +18,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO
         [JsonPropertyName("patient_id")]
         public long PatientId { get; set; }
 
-        [JsonPropertyName("patient_name")]
-        public string PatientName { get; set; }
+        [JsonPropertyName("patient_data")]
+        public PatientDataDTO PatientData { get; set; }
 
         [JsonPropertyName("symptoms")]
         public string Symptoms { get; set; }
@@ -51,7 +52,13 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO
         public List<DiagnosisAttribute> Diagnosis { get; set; }
 
         [JsonPropertyName("case_sheet")]
-        public string CaseSheet { get; set; }   
+        public string CaseSheet { get; set; }
+
+        [JsonPropertyName("casesheet_type")]
+        public string CaseSheetType { get; set; }
+
+        [JsonPropertyName("chit_number")]
+        public string ChitNumber { get; set; }
 
 
 
