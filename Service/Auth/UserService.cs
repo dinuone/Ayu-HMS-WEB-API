@@ -51,6 +51,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Auth
             {
                 return new AuthenticateResponse("User Account Cannot Found");
             }
+       
+
+            if(user.IsActive == false || user.IsDelete == true) return new AuthenticateResponse("User Account inactive or deleted!");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {

@@ -38,9 +38,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientLog
         public List<DiagnosisAttribute> Diagnosis { get; set; }
 
         [JsonPropertyName("casesheet")]
-        public String? CaseSheet { get; set; }
+        public string? CaseSheet { get; set; }
 
-
+        [JsonPropertyName("casesheet_type")]
+        public string? CaseSheetType { get; set; }
 
 
 

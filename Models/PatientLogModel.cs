@@ -11,6 +11,7 @@ using Innofactor.EfCoreJsonValueConverter;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Models
 {
+    [Table("patient_logs")]
     public class PatientLogModel : BaseEntity
     {
 
@@ -63,6 +64,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
 
         [JsonField, Column("case_sheet", TypeName = "json")]
         public string? CaseSheet { get; set; }
+
+        [Column("case_sheet_type")]
+        public string? CaseSheetType { get; set; }
 
     }
 }
