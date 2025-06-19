@@ -239,7 +239,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
 
                 var drugs = await _context.Drugs
                     .Where(p => !p.IsDelete && p.IsActive)
-                    .Select(p => new DrugNameListDTO { Id = p.Id, Name = p.Name })
+                    .Select(p => new DrugNameListDTO { Id = p.Id, Name = p.DrugCode })
                     .ToListAsync();
 
                 var treatments = await _context.Treatments
