@@ -9,5 +9,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
+
+        [JsonPropertyName("drug_code")]
+        public string DrugCode { get; set; }
     }
 }
