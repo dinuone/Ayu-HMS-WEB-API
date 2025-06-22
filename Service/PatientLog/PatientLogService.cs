@@ -239,6 +239,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
 
                 foreach (var PatientLog in PatientLogs)
                 {
+                 
+
                     PatientLogListMapp.Add(new PatientLogListDTO
                     {
                         Id = PatientLog.Id,
@@ -333,7 +335,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
 
                 var drugs = await _context.Drugs
                     .Where(p => !p.IsDelete && p.IsActive)
-                    .Select(p => new DrugNameListDTO { Id = p.Id, Name = p.DrugCode })
+                    .Select(p => new DrugNameListDTO { Id = p.Id, Name = p.Name, DrugCode =p.DrugCode })
                     .ToListAsync();
 
                 var treatments = await _context.Treatments
@@ -399,10 +401,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     IsActive = pl.IsActive,
                     CreatedAt = pl.CreatedAt,
                     CreatedBy = pl.CreatedBy,
-                    Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(pl.Prescription)),
-                    Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(pl.Treatments)),
-                    Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
-                    Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
+                    Prescription = pl.Prescription,
+                    Treatments = pl.Treatments,
+                    Clinics = pl.Clinics,
+                    Diagnosis = pl.Diagnosis,
                     CaseSheet = pl.CaseSheet,
                     CaseSheetType = pl.CaseSheetType
                 }).FirstOrDefault();
@@ -461,28 +463,28 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     .Where(pl => pl.PatientId == patientId && !pl.IsDelete)
                     .ToListAsync();
 
-               
 
-                var logList = patientLogs.Select(pl => new PatientLogListDTO
+
+                List<PatientLogListDTO> logList = patientLogs.Select(pl => new PatientLogListDTO
                 {
                     Id = pl.Id,
                     PatientId = pl.PatientId,
                     ChitNumber = pl.ChitNumber,
                     PatientData = GetPatientRecord(pl.PatientId),
                     VisitId = pl.VisitId,
-                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
+                    VisitDate = pl.VisitDate,
                     Remarks = pl.Remarks,
                     IsAssignedToClinic = pl.IsAssignedToClinic,
-                    NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.NextVisitDate, localTimeZone),
+                    NextVisitDate = pl.NextVisitDate,
                     DoctorId = pl.DoctorId,
                     DoctorName = pl.DoctorName,
                     IsActive = pl.IsActive,
                     CreatedAt = pl.CreatedAt,
                     CreatedBy = pl.CreatedBy,
-                    Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(pl.Prescription)),
-                    Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(pl.Treatments)),
-                    Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
-                    Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
+                    Prescription = pl.Prescription,
+                    Treatments = pl.Treatments,
+                    Clinics = pl.Clinics,
+                    Diagnosis = pl.Diagnosis,
                     CaseSheet = pl.CaseSheet,
                     CaseSheetType = pl.CaseSheetType
                 }).ToList();
@@ -503,5 +505,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                 };
             }
         }
+
+
     }
 }

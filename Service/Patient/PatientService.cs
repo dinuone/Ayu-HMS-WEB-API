@@ -1,10 +1,13 @@
 ﻿
+using System.ComponentModel;
 using System.Net;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientLogDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
+using Harendra_Ayurveda_HMS_WEB_API.Helpers.Utils;
 using Harendra_Ayurveda_HMS_WEB_API.Models;
 using Harendra_Ayurveda_HMS_WEB_API.Service.Location;
 using Harendra_Ayurveda_HMS_WEB_API.Service.SequenceGenerator;
@@ -496,6 +499,209 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             }
         }
 
-        
+
+
+
+       
+
+
+
+        public async Task<BaseResponse> ImportPatientsFromCsv(PatientImportFromExcelRequest request)
+        {
+            try
+            {
+                int importedCount = 0;
+                foreach (var req in request.Patients)
+                {
+                    
+                    bool isNicDuplicate = await _context.Patients.AnyAsync(p => p.NiceNumber == req.NicNumber && !p.IsDelete);
+                    if (isNicDuplicate)
+                        continue; 
+
+                    string registrationNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync();
+
+                    var patient = new PatientModel
+                    {
+                        RegistrationNumber = registrationNumber,
+                        NiceNumber = req.NicNumber,
+                        Gender = req.Gender,
+                        City = req.City,
+                        District = req.District,
+                        Province = req.Province,
+                        ContactNo = req.ContactNo,
+                        Name = req.Name,
+                        Age = req.Age,
+                        MaritalStatus = req.MaritalStatus,
+                        Occupation = req.Occupation,
+                        AddressLine1 = req.AddressLine1,
+                        AddressLine2 = req.AddressLine2,
+                        QrCode = req.QrCode,
+                        IsActive = true,
+                        IsDelete = false,
+                        CreatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString(),
+                        CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, localtimeZone)
+                    };
+                    _context.Patients.Add(patient);
+                    importedCount++;
+                }
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"{importedCount} patients imported successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error importing patients from JSON.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "Error importing patients: " + ex.Message }
+                };
+            }
+        }
+
+        public async Task<BaseResponse> GetPatientRecordForView(long id)
+        {
+            try
+            {
+                // Fetch patient and validate
+                var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id);
+                if (patient == null)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Data = new { message = "Patient not found" }
+                    };
+                }
+
+                var patientDto = new PatientDataDTO
+                {
+                    Id = patient.Id,
+                    Name = patient.Name,
+                    RegistrationNumber = patient.RegistrationNumber,
+                    Age = patient.Age,
+                    Gender = patient.Gender,
+                    ContactNo = patient.ContactNo,
+                    QrCode = patient.QrCode,
+                    AddressLine1 = patient.AddressLine1,
+                    AddressLine2 = patient.AddressLine2,
+                    City = patient.City,
+                    Region = patient.District,
+                    Province = patient.Province,
+                    MaritalStatus = patient.MaritalStatus,
+                    Occupation = patient.Occupation,
+                    NicNumber = patient.NiceNumber
+                };
+
+                // Fetch patient visits
+                var patientVisits = await _context.PatientVisits
+                    .Where(p => p.PatientId == id && !p.IsDelete)
+                    .OrderByDescending(p => p.VisitDate)
+                    .ToListAsync();
+
+                var visitList = patientVisits.Select(visit => new PatientVisitListDTO
+                {
+                    Id = visit.Id,
+                    ChitNumber = visit.ChitNumber,
+                    NicNumber = patient.NiceNumber,
+                    DoctorName = GetDoctorName(visit.DoctorId), // Optional: cache or batch load
+                    Status = visit.Status == PatientVisitStatus.PENDING_PAYMENT ? "COMPLETED" : "PENDING",
+                    PatientName = patient.Name,
+                    PatientRegNo = patient.RegistrationNumber,
+                    PatientType = visit.PatientType.ToString(),
+                    VisitDate = visit.VisitDate,
+                    VisitType = visit.VisitType.ToString()
+                }).ToList();
+
+                // Fetch patient logs
+                var patientLogs = await _context.PatientLogs
+                    .Where(pl => pl.PatientId == id && !pl.IsDelete)
+                    .ToListAsync();
+
+                var logList = patientLogs.Select(pl => new PatientLogListDTO
+                {
+                    Id = pl.Id,
+                    PatientId = pl.PatientId,
+                    ChitNumber = pl.ChitNumber,
+                    PatientData = patientDto, // reuse already fetched patient data
+                    VisitId = pl.VisitId,
+                    VisitDate = pl.VisitDate,
+                    Remarks = pl.Remarks,
+                    IsAssignedToClinic = pl.IsAssignedToClinic,
+                    NextVisitDate = pl.NextVisitDate,
+                    DoctorId = pl.DoctorId,
+                    DoctorName = pl.DoctorName,
+                    IsActive = pl.IsActive,
+                    CreatedAt = pl.CreatedAt,
+                    CreatedBy = pl.CreatedBy,
+                    Prescription = pl.Prescription,
+                    Treatments = pl.Treatments,
+                    Clinics = pl.Clinics,
+                    Diagnosis = pl.Diagnosis,
+                    CaseSheet = pl.CaseSheet,
+                    CaseSheetType = pl.CaseSheetType
+                }).ToList();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new
+                    {
+                        patient_data = patientDto,
+                        visit_data = visitList,
+                        patient_log = logList
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while retrieving patient data by ID");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
+        }
+
+
+        private PatientDataDTO? GetPatientRecord(long patientId)
+        {
+            PatientDataDTO? patientData = _context.Patients.Where(p => p.Id == patientId).Select(p => new PatientDataDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                NicNumber = p.NiceNumber,
+                RegistrationNumber = p.RegistrationNumber,
+                Gender = p.Gender,
+                ContactNo = p.ContactNo,
+                Age = p.Age,
+                MaritalStatus = p.MaritalStatus,
+                Province = p.Province,
+                Region = p.District,
+                AddressLine1 = p.AddressLine1,
+                AddressLine2 = p.AddressLine2,
+                City = p.City,
+                Occupation = p.Occupation,
+                QrCode = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{p.QrCode}",
+
+            }).FirstOrDefault();
+
+            return patientData;
+        }
+
+        private string GetDoctorName(long doctorId)
+        {
+            var doctor = _context.Users.Where(p => p.Id == doctorId).FirstOrDefault();
+            return doctor.FirstName + " " + doctor.LastName;
+
+        }
     }
+
+
+
 }

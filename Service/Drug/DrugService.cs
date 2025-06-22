@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DrugRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugCategoryDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.DrugDTO;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.TreatmentCategoryDTO;
@@ -33,7 +34,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             try
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
-               
+
+                
+
                 var drugExists = await _context.DrugCategories
                     .AnyAsync(d => d.Id == request.DrugCategoryId
                     && d.IsActive == true && d.IsDelete == false);
@@ -41,7 +44,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 {
                     return new BaseResponse
                     {
-                        StatusCode = (int)HttpStatusCode.BadRequest, 
+                        StatusCode = (int)HttpStatusCode.BadRequest,
                         Data = new
                         {
                             message = "Invalid drug category id"
@@ -82,7 +85,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                         message = ex.Message,
                     }
                 };
-                
+
             }
 
         }
@@ -93,7 +96,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             try
             {
                 DrugModel? drug = await _context.Set<DrugModel>().FindAsync(id);
-                if (drug == null) 
+                if (drug == null)
                 {
                     response = new BaseResponse()
                     {
@@ -123,7 +126,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     Data = new
                     {
                         message = "Drug updated successfully",
-                        
+
                     }
                 };
                 return response;
@@ -192,7 +195,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                     Brand = drug.Brand,
                     Description = drug.Description,
                     UnitPrice = drug.UnitPrice,
-                    DrugCategory =drug.DrugCategoryId
+                    DrugCategory = drug.DrugCategoryId
                 };
 
                 return new BaseResponse
@@ -269,7 +272,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             try
             {
                 DrugModel? drug = await _context.Set<DrugModel>().FindAsync(id);
-                if (drug == null) 
+                if (drug == null)
                 {
                     response = new BaseResponse()
                     {
@@ -347,7 +350,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
                 };
             }
 
-           
+
 
 
             catch (Exception ex)
@@ -513,5 +516,71 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         }
 
 
+    
+
+public async Task<BaseResponse> ImportDrugsFromCsv(DrugImportFromExcelRequest request)
+        {
+            try
+            {
+                if (request.Drugs == null || !request.Drugs.Any())
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new { message = "No drugs provided for import." }
+                    };
+                }
+
+                string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                foreach (var drugRequest in request.Drugs)
+                {
+                    var drugExists = await _context.DrugCategories
+                        .AnyAsync(d => d.Id == drugRequest.DrugCategoryId
+                        && d.IsActive == true && d.IsDelete == false);
+
+                    if (!drugExists)
+                    {
+                        return new BaseResponse
+                        {
+                            StatusCode = (int)HttpStatusCode.BadRequest,
+                            Data = new { message = $"Invalid drug category id: {drugRequest.DrugCategoryId}" }
+                        };
+                    }
+
+                    DrugModel drug = new DrugModel
+                    {
+                        Name = drugRequest.DrugName,
+                        DrugCode = drugRequest.DrugCode,
+                        Brand = drugRequest.Brand,
+                        Description = drugRequest.Description,
+                        UnitPrice = drugRequest.UnitPrice,
+                        DrugCategoryId = drugRequest.DrugCategoryId,
+                        CreatedBy = createdBy
+                    };
+
+                    await _context.Drugs.AddAsync(drug);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = "Drugs imported successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while importing drugs from CSV");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = ex.Message }
+                };
+            }
+        }
     }
 }
+
+     

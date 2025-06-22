@@ -673,8 +673,57 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
         }
 
+        public async Task<BaseResponse> GetAppointmentHistory()
+        {
+            BaseResponse response;
+            try
+            {
+                long loggedInUserId = userContext.UserId;
+
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId && p.Status == PatientVisitStatus.PENDING_PAYMENT || p.Status == PatientVisitStatus.COMPLETE).ToListAsync();
+
+                List<PatientVisitListDTO> patientList = new();
+
+                foreach (var visit in patientVisits)
+                {
+                    PatientDataDTO? patientRecord = GetPatientRecord(visit.PatientId);
 
 
 
+                    PatientVisitListDTO record = new PatientVisitListDTO()
+                    {
+                        Id = visit.Id,
+                        ChitNumber = visit.ChitNumber,
+                        NicNumber = patientRecord?.NicNumber,
+                        DoctorName = GetDoctorName(visit.DoctorId),
+                        Status = visit.Status == PatientVisitStatus.PENDING_PAYMENT ? "COMPLETED" : "PENDING",
+                        PatientName = patientRecord?.Name,
+                        PatientRegNo = patientRecord?.RegistrationNumber,
+                        PatientType = visit.PatientType.ToString(),
+                        VisitDate = visit.VisitDate,
+                        VisitType = visit.VisitType.ToString()
+
+                    };
+
+                    patientList.Add(record);
+                }
+
+                return response = new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = patientList
+                };
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting patient visit list for doctor------------------------------------------------------------------------------------");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "An error occurred while getting patient visit list for doctor." }
+                };
+            }
+        }
     }
 }

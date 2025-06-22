@@ -83,5 +83,23 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
         }
 
+        [Authorize]
+        [HttpPost("import-from-csv")]
+        public async Task<IActionResult> ImportPatientsFromCsv([FromForm] PatientImportFromExcelRequest request)
+        {
+            var response = await patientService.ImportPatientsFromCsv(request);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+
+        }
+
+        [Authorize]
+        [HttpGet("get-patient-record-for-view/{id}")]
+        public async Task<IActionResult> GetPatientRecordForView(long id)
+        {
+            var response = await patientService.GetPatientRecordForView(id);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+
+        }
+
     }
 }

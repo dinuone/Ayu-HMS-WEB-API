@@ -1,5 +1,6 @@
 ﻿using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.DrugRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
+using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
 using Harendra_Ayurveda_HMS_WEB_API.Helpers;
 
 namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
@@ -14,5 +15,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> treatmentIds);
         Task<BaseResponse> Filter(FilterRequestDrug request);
+
+        Task<BaseResponse> ImportDrugsFromCsv(DrugImportFromExcelRequest request);
     }
 }

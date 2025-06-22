@@ -116,5 +116,19 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
                 StatusCode = response.StatusCode
             };
         }
+
+        [Authorize]
+        [HttpPost("import-from-excel")]
+        public async Task<IActionResult> ImportDrugsFromCsv(DrugImportFromExcelRequest request)
+        {
+            var response = await _drugService.ImportDrugsFromCsv(request);
+            return new JsonResult(response)
+            {
+                StatusCode = response.StatusCode
+            };
+
+
+
+        }
     }
 }
