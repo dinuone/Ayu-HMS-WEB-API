@@ -399,10 +399,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     IsActive = pl.IsActive,
                     CreatedAt = pl.CreatedAt,
                     CreatedBy = pl.CreatedBy,
-                    Prescription = JsonConvert.DeserializeObject<List<PrescriptionAttribute>>(JsonConvert.SerializeObject(pl.Prescription)),
-                    Treatments = JsonConvert.DeserializeObject<List<TreatmentsAttribute>>(JsonConvert.SerializeObject(pl.Treatments)),
-                    Clinics = JsonConvert.DeserializeObject<List<ClinicAttribute>>(JsonConvert.SerializeObject(pl.Clinics)),
-                    Diagnosis = JsonConvert.DeserializeObject<List<DiagnosisAttribute>>(JsonConvert.SerializeObject(pl.Diagnosis)),
+                    Prescription = pl.Prescription,
+                    Treatments = pl.Treatments,
+                    Clinics = pl.Clinics,
+                    Diagnosis = pl.Diagnosis,
                     CaseSheet = pl.CaseSheet,
                     CaseSheetType = pl.CaseSheetType
                 }).FirstOrDefault();
