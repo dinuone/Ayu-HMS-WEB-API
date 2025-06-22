@@ -586,7 +586,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Age = patient.Age,
                     Gender = patient.Gender,
                     ContactNo = patient.ContactNo,
-                    QrCode = patient.QrCode,
+                    QrCode = $"{GlobalAttributeHelper.fileUploadSettings.BaseUrl}{patient.QrCode}",
                     AddressLine1 = patient.AddressLine1,
                     AddressLine2 = patient.AddressLine2,
                     City = patient.City,
