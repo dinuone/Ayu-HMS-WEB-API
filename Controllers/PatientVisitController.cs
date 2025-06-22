@@ -86,6 +86,14 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
+        [Authorize]
+        [HttpGet("get-appointment-history")]
+        public async Task<IActionResult> GetAppointmentHistory()
+        {
+            var response = await patientVisitService.GetAppointmentHistory();
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
 
         [Authorize]
         [HttpGet("get-by-patient/{patientId}")]

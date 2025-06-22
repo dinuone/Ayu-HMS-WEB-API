@@ -14,8 +14,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
         Task<BaseResponse> UpdateStatus(long id);
         Task<BaseResponse> DeleteAll(List<long> patientIds);
         Task<BaseResponse> Filter(FilterRequest request);
-
         Task<BaseResponse> ImportPatientsFromCsv(PatientImportFromExcelRequest request);
+        Task<BaseResponse> GetPatientRecordForView(long id);
 
     }
 }

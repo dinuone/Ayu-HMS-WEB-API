@@ -67,12 +67,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         }
 
 
-        [Authorize]
-        [HttpGet("get-patient-log-list-by-doctor-id/{userId}")]
-        public async Task<IActionResult> GetPatientLogListByDoctorId(int userId)
-        {
-            var response = await _patientLogService.GetpatientLogsListByUserId(userId);
-            return new JsonResult(response) { StatusCode = response.StatusCode };
-        }
+    
     }
 }
