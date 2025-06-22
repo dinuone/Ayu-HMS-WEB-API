@@ -503,5 +503,56 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                 };
             }
         }
+
+
+
+        public async Task<BaseResponse> GetpatientLogsListByUserId(int userid) 
+        {
+            try
+            {
+                var patientLogs = await _context.PatientLogs
+                    .Where(pl => pl.DoctorId == userid && !pl.IsDelete)
+                    .ToListAsync();
+
+                var logList = patientLogs.Select(pl => new PatientLogListDTO
+                {
+                    Id = pl.Id,
+                    PatientId = pl.PatientId,
+                    ChitNumber = pl.ChitNumber,
+                    PatientData = GetPatientRecord(pl.PatientId),
+                    VisitId = pl.VisitId,
+                    VisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.VisitDate, localTimeZone),
+                    Remarks = pl.Remarks,
+                    IsAssignedToClinic = pl.IsAssignedToClinic,
+                    NextVisitDate = SupportUtils.ConvertUTCDateToLocalDate(pl.NextVisitDate, localTimeZone),
+                    DoctorId = pl.DoctorId,
+                    DoctorName = pl.DoctorName,
+                    IsActive = pl.IsActive,
+                    CreatedAt = pl.CreatedAt,
+                    CreatedBy = pl.CreatedBy,
+                    Prescription = pl.Prescription,
+                    Treatments = pl.Treatments,
+                    Clinics = pl.Clinics,
+                    Diagnosis = pl.Diagnosis,
+                    CaseSheet = pl.CaseSheet,
+                    CaseSheetType = pl.CaseSheetType
+                }).ToList();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = logList
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching patient logs by user ID.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { Message = "An error occurred while fetching the patient logs." }
+                };
+            }
+        }
     }
 }

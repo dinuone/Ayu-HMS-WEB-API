@@ -43,6 +43,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API
         public DbSet <PatientLogModel> PatientLogs { get; set; }
         public DbSet <DoctorAssginModel> DoctorAssgins { get; set; }
         public DbSet <InvoiceModel> Invoice { get; set; }
+        public DbSet<RatingsModel> Ratings { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

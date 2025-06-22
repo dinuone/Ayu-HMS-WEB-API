@@ -31,6 +31,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
             try
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
+
+                
               
                DrugCategoryModel Drugcategory = new DrugCategoryModel
                {
@@ -38,6 +40,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
                    Description = request.Description,
                    CreatedBy = createdBy,
                };
+
+                
                 
                 _context.Set<DrugCategoryModel>().Add(Drugcategory);
                 await _context.SaveChangesAsync();
