@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel;
 using System.Net;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.FilterRequest;
 using Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest;
@@ -496,6 +497,73 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             }
         }
 
-        
+
+
+
+       
+
+
+
+        public async Task<BaseResponse> ImportPatientsFromCsv(PatientImportFromExcelRequest request)
+        {
+            try
+            {
+                int importedCount = 0;
+                foreach (var req in request.Patients)
+                {
+                    
+                    bool isNicDuplicate = await _context.Patients.AnyAsync(p => p.NiceNumber == req.NicNumber && !p.IsDelete);
+                    if (isNicDuplicate)
+                        continue; 
+
+                    string registrationNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync();
+
+                    var patient = new PatientModel
+                    {
+                        RegistrationNumber = registrationNumber,
+                        NiceNumber = req.NicNumber,
+                        Gender = req.Gender,
+                        City = req.City,
+                        District = req.District,
+                        Province = req.Province,
+                        ContactNo = req.ContactNo,
+                        Name = req.Name,
+                        Age = req.Age,
+                        MaritalStatus = req.MaritalStatus,
+                        Occupation = req.Occupation,
+                        AddressLine1 = req.AddressLine1,
+                        AddressLine2 = req.AddressLine2,
+                        QrCode = req.QrCode,
+                        IsActive = true,
+                        IsDelete = false,
+                        CreatedBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString(),
+                        CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, localtimeZone)
+                    };
+                    _context.Patients.Add(patient);
+                    importedCount++;
+                }
+                await _context.SaveChangesAsync();
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = new { message = $"{importedCount} patients imported successfully." }
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error importing patients from JSON.");
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new { message = "Error importing patients: " + ex.Message }
+                };
+            }
+        }
+
+
     }
+
+
+
 }
