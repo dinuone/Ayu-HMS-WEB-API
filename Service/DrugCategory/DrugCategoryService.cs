@@ -32,9 +32,22 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.DrugCategory
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
-                
-              
-               DrugCategoryModel Drugcategory = new DrugCategoryModel
+                // Check if the drug already exists
+                bool isDrugNameDuplicated = await _context.Set<DrugCategoryModel>().AnyAsync(d => d.Name == request.Name && d.IsDelete == false);
+
+                if (isDrugNameDuplicated)
+                {
+                    return new BaseResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Data = new
+                        {
+                            message = "Drug categoy already exists."
+                        }
+                    };
+                }
+
+                DrugCategoryModel Drugcategory = new DrugCategoryModel
                {
                    Name = request.Name,
                    Description = request.Description,

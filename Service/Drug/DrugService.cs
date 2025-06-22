@@ -35,6 +35,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Drug
             {
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
+                
+
                 var drugExists = await _context.DrugCategories
                     .AnyAsync(d => d.Id == request.DrugCategoryId
                     && d.IsActive == true && d.IsDelete == false);
