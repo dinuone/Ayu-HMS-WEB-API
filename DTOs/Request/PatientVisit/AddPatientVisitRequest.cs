@@ -30,6 +30,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientVisit
 
         [JsonPropertyName("feelo_app_ref")]
         public string? FeeloAppRef { get; set; }
+
+        [JsonPropertyName("platform")]
+        public string? Platform { get; set; }
     }
 
     public class TreatmentData

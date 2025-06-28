@@ -35,5 +35,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientVisitDTO
 
         [JsonPropertyName("doctor_name")]
         public string? DoctorName { get; set; }
+
+        [JsonPropertyName("platform")]
+        public string? Platform { get; set; }
+
+
     }
 }
