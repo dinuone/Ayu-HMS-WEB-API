@@ -116,7 +116,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Helpers
 
         public enum PatientType
         {
-            Feelo = 1,
+            Promotion = 1,
             Normal =2,
         }
 

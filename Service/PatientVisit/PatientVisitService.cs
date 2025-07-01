@@ -70,6 +70,24 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 }
 
 
+                string? platform = null;
+                if (request.PatientType == PatientType.Promotion) // Replace 'Type2' with the actual enum value for 2
+                {
+                    // Assuming you want the platform for the first treatment in the list
+                    var treatmentId = request.Treatments.FirstOrDefault()?.Id;
+                    if (treatmentId != null)
+                    {
+                        var offer = await _context.Offers
+                            .Where(o => o.TreatmentId == treatmentId)
+                            .OrderByDescending(o => o.StartDate)
+                            .FirstOrDefaultAsync();
+
+                        platform = offer?.Platform;
+                    }
+                }
+
+
+
                 PatientVisitModel newPatientVisit = new PatientVisitModel
                 {
                     PatientId = patient.Id,
@@ -83,7 +101,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                     FeeloAppRef = request.FeeloAppRef,
                     PatientType = request.PatientType,
                     Treatment = request.Treatments,
-                    VisitType = request.VisitType
+                    VisitType = request.VisitType,
+                    Platform = request.Platform
                 };
 
 
@@ -175,7 +194,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),
                         VisitDate = visit.VisitDate,
-                        VisitType = visit.VisitType.ToString()
+                        VisitType = visit.VisitType.ToString(),
+                        Platform = visit.Platform,
 
                     };
 
@@ -264,6 +284,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 patientVisitData.Treatments = patientVisit.Treatment;
                 patientVisitData.PatientType = patientVisit.PatientType.ToString();
                 patientVisitData.VisitType = patientVisit.VisitType.ToString();
+                patientVisitData.Platform = patientVisit.Platform;
                 patientVisitData.PatientData = GetPatientRecord(patientVisit.PatientId);
                 patientVisitData.Status = patientVisit.Status;
                 patientVisitData.VisitDate = patientVisit.VisitDate;
@@ -589,6 +610,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         PatientName = patientRecord?.Name,
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),
+                        Platform = visit.Platform,
                         VisitDate = visit.VisitDate,
                         VisitType = visit.VisitType.ToString()
 
@@ -649,6 +671,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         PatientName = patientRecord?.Name,
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),
+                        Platform = visit.Platform,
                         VisitDate = visit.VisitDate,
                         VisitType = visit.VisitType.ToString()
                     };
@@ -700,6 +723,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         PatientName = patientRecord?.Name,
                         PatientRegNo = patientRecord?.RegistrationNumber,
                         PatientType = visit.PatientType.ToString(),
+                        Platform = visit.Platform,
                         VisitDate = visit.VisitDate,
                         VisitType = visit.VisitType.ToString()
 

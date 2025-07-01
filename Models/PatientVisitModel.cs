@@ -48,5 +48,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("feelo_app_ref")]
         public string? FeeloAppRef { get; set; }
 
+        [Column("platform")]
+        public string? Platform { get; set; }
     }
 }
