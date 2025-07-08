@@ -725,5 +725,52 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 };
             }
         }
+
+
+
+
+        public async Task<List<PatientVisitTimelineDTO>> GetPatientTimeline(long patientId)
+        {
+            try
+            {
+                var visits = await _context.PatientVisits
+                    .Where(v => v.PatientId == patientId && v.IsDelete == false)
+                    .OrderBy(v => v.VisitDate)
+                    .ToListAsync();
+
+                var timeline = new List<PatientVisitTimelineDTO>();
+
+                foreach (var visit in visits)
+                {
+                   
+                    var doctor = await _context.Users.FindAsync(visit.DoctorId);
+                    string doctorName = doctor != null ? $"{doctor.FirstName} {doctor.LastName}" : "Unknown";
+
+                    
+                    var treatments = visit.Treatment?.Select(t => t.Name).ToList() ?? new List<string>();
+
+                    
+                    var patientLog = await _context.PatientLogs.FirstOrDefaultAsync(pl => pl.VisitId == visit.Id);
+                    var clinics = patientLog?.Clinics?.Select(c => c.name).ToList() ?? new List<string>();
+
+                    timeline.Add(new PatientVisitTimelineDTO
+                    {
+                        VisitId = visit.Id,
+                        VisitDate = visit.VisitDate,
+                        DoctorName = doctorName,
+                        Treatments = treatments,
+                        Clinics = clinics
+                    });
+                }
+
+                return timeline;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching patient timeline.");
+                return new List<PatientVisitTimelineDTO>();
+            }
+        }
+
     }
 }
