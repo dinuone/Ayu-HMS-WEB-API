@@ -22,7 +22,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         Task<BaseResponse> GetPatientVisitListForDoctor();
         Task<BaseResponse> GetPatientVisitsByPatientId(long patientId);
         Task<BaseResponse> GetAppointmentHistory();
-        Task<BaseResponse> GetAppointmentHistoryByPatientId(int patientId);
+        Task<BaseResponse> GetPatientTimeline(long patientId);
 
     }
 }

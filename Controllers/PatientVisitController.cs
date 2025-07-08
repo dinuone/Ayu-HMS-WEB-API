@@ -18,7 +18,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         private readonly IPatientVisitService patientVisitService;
         public PatientVisitController(IPatientVisitService patientVisitService)
         {
-            this.patientVisitService = patientVisitService; 
+            this.patientVisitService = patientVisitService;
         }
 
         [Authorize]
@@ -100,6 +100,17 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         public async Task<IActionResult> GetPatientVisitsByPatientId(long patientId)
         {
             var response = await patientVisitService.GetPatientVisitsByPatientId(patientId);
+            return new JsonResult(response) { StatusCode = response.StatusCode };
+        }
+
+        [Authorize]
+        [HttpGet("get-patient-timeline/{patientId}")]
+        public async Task<IActionResult> GetPatientTimeline(long patientId) 
+        {
+            
+            var response = await patientVisitService.GetPatientTimeline(patientId);
+
+            
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 
