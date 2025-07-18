@@ -451,5 +451,83 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
                 };
             }
         }
+
+        public async Task<BaseResponse> CalTreatmentTotal(GetOffersPriceRequest request)
+        {
+            try
+            {
+                var today = DateTime.UtcNow;
+
+                // Fetch treatments
+                var treatmentData = await _context.Treatments
+                    .Where(t => request.TreatmentId.Contains(t.Id) && !t.IsDelete && t.IsActive)
+                    .ToListAsync();
+
+                // Fetch matching offers
+                var offers = await _context.Offers
+                    .Where(o => request.TreatmentId.Contains(o.TreatmentId)
+                                && !o.IsDelete
+                                && o.StartDate <= today
+                                && o.EndDate >= today)
+                    .ToListAsync();
+
+                var treatmentResponseList = new List<object>();
+                decimal totalOriginalPrice = 0;
+                decimal totalDiscountedPrice = 0;
+
+                foreach (var treatment in treatmentData)
+                {
+                    var matchingOffer = offers.FirstOrDefault(o => o.TreatmentId == treatment.Id);
+                    decimal discountPercentage = matchingOffer?.DiscountPercentage ?? 0;
+                    decimal originalPrice = treatment.TreatmentPrice;
+                    decimal discountedPrice = originalPrice;
+
+                    if (discountPercentage > 0)
+                    {
+                        discountedPrice = originalPrice - (originalPrice * discountPercentage / 100);
+                    }
+
+                    totalOriginalPrice += originalPrice;
+                    totalDiscountedPrice += discountedPrice;
+
+                    treatmentResponseList.Add(new
+                    {
+                        treatmentId = treatment.Id,
+                        name = treatment.Name,
+                        originalPrice,
+                        discountPercentage,
+                        discountedPrice
+                    });
+                }
+
+                var result = new
+                {
+                    treatments = treatmentResponseList,
+                    totalOriginalPrice,
+                    totalDiscountedPrice
+                };
+
+                return new BaseResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while getting available offers");
+                return new BaseResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Data = new
+                    {
+                        message = "An error occurred while checking offers."
+                    }
+                };
+            }
+        }
+
+
+
     }
 }

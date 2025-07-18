@@ -14,5 +14,6 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Offers
         Task<BaseResponse> UpdateStatus(int id);
         Task<BaseResponse> DeleteAll(List<int> OfferIds);
         Task<BaseResponse> Filter(FilterRequest request);
+        Task<BaseResponse> CalTreatmentTotal(GetOffersPriceRequest request);
     }
 }
