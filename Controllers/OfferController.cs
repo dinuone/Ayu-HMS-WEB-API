@@ -108,5 +108,17 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
 
 
         }
+
+        [Authorize]
+        [HttpPost("calculate-treatment-total")]
+
+        public async Task<IActionResult> GetAvailableOffers(GetOffersPriceRequest request)
+        {
+            var response = await _offerService.CalTreatmentTotal(request);
+            return new JsonResult(response)
+            {
+                StatusCode = response.StatusCode
+            };
+        }
     }
 }
