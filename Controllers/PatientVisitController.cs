@@ -63,10 +63,10 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Controllers
         }
 
         [Authorize]
-        [HttpGet("check-account/{nic_number}")]
-        public async Task<IActionResult> CheckAccount(string nic_number)
+        [HttpGet("check-account/{contact}")]
+        public async Task<IActionResult> CheckAccount(string contact)
         {
-            var response = await patientVisitService.CheckPatientAccount(nic_number);
+            var response = await patientVisitService.CheckPatientAccount(contact);
             return new JsonResult(response) { StatusCode = response.StatusCode };
         }
 

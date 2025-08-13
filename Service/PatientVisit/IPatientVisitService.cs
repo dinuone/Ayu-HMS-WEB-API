@@ -18,7 +18,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
         Task<BaseResponse> GetAvailableClinicsOrTreatments(PatientVisitTypes patientVisitType);
         Task<BaseResponse> GetAvailableDoctorsForClinic(long clinicId);
         Task<BaseResponse> GetAvailableDoctorsForTreatments(TreatmentIdsRequest request);
-        Task<BaseResponse> CheckPatientAccount(string nicNumber);
+        Task<BaseResponse> CheckPatientAccount(string contactNumber);
         Task<BaseResponse> GetPatientVisitListForDoctor();
         Task<BaseResponse> GetPatientVisitsByPatientId(long patientId);
         Task<BaseResponse> GetAppointmentHistory();

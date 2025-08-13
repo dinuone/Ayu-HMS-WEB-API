@@ -15,7 +15,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("name", TypeName = "varchar(128)")]
         public required string Name { get; set; }
 
-        [Column("price")]
+        [Column("price",TypeName ="decimal(8,2)")]
         public decimal TreatmentPrice { get; set; }
 
         [Column("description")]
