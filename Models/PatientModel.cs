@@ -17,8 +17,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Models
         [Column("name", TypeName = "varchar(128)")]
         public required string Name { get; set; }
 
-        [Column("nic_number" , TypeName = "varchar(128)")]
-        public required string NiceNumber { get; set; } 
+        [Column("nic_number", TypeName = "varchar(128)")]
+        public string? NicNumber { get; set; } 
 
         [Column("age")]
         public required int Age { get; set; }

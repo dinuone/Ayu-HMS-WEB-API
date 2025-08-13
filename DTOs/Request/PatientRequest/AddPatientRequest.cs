@@ -44,7 +44,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Request.PatientRequest
         public required string Province { get; set; }
 
         [JsonPropertyName("nic_number")]
-        public required string NicNumber { get; set; }   
+        public string? NicNumber { get; set; } = null;
 
 
 

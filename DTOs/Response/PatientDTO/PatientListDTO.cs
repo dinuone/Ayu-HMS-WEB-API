@@ -21,7 +21,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.DTOs.Response.PatientDTO
         public required string Gender { get; set; }
 
         [JsonPropertyName("nic_number")]
-        public string NicNumber { get; set; }
+        public string? NicNumber { get; set; }
 
         [JsonPropertyName("patient_type")]
         public string PatientType { get; set; }

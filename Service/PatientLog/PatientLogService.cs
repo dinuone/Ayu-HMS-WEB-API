@@ -110,35 +110,69 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                         }
                     };
                 }
+                //if select treatment -> no hospital charge + customer charge not cal
+                IQueryable<PatientVisitModel> patientVisitList = _context.PatientVisits.Where(pv => pv.Id == request.VisitId);
+                var result = patientVisitList.FirstOrDefault();
 
-                //cal hospital charge + custom charges
-                decimal hospitalCharge = rates.HospitalCharge;
 
-                var customCharges = JsonConvert.DeserializeObject<Dictionary<string, decimal>>(rates.CustomCharges);
-                decimal customChargesTotal = customCharges?.Values.Sum() ?? 0;
+                decimal totalHospitalCharge = 0;
+                decimal totalPrescriptionCost = 0;
+                decimal customChargesTotal = 0;
+                List<DrugModel> drugs = [];
+                decimal doctorFee = 0;
+                decimal hospitalChargeOnly = 0;
 
-                decimal totalHospitalCharge = hospitalCharge + customChargesTotal;
-
-                //cal prescription cost
-                var prescriptionDruglist = request.Prescription.Select(p => p.id).ToList();
-
-                List<DrugModel> drugs = await _context.Drugs.Where(d => prescriptionDruglist.Contains(d.Id)).ToListAsync();
-
-                decimal totalPrescriptionCost = request.Prescription.Sum(pres =>
+                if (result.VisitType == PatientVisitTypes.Clinic)
                 {
-                    var drug = drugs.FirstOrDefault(d => d.Name == pres.name);
-                    return drug != null ? drug.UnitPrice * pres.qty : 0;
-                });
+                    //cal hospital charge + custom charges
+                    decimal hospitalCharge = rates.HospitalCharge;
+
+                    var customCharges = JsonConvert.DeserializeObject<Dictionary<string, decimal>>(rates.CustomCharges);
+                    customChargesTotal = customCharges?.Values.Sum() ?? 0;
+
+                    totalHospitalCharge = hospitalCharge + customChargesTotal;
+
+                    //cal prescription cost
+                    var prescriptionDruglist = request.Prescription.Select(p => p.id).ToList();
+
+                    drugs = await _context.Drugs.Where(d => prescriptionDruglist.Contains(d.Id)).ToListAsync();
+
+                    totalPrescriptionCost = request.Prescription.Sum(pres =>
+                    {
+                        var drug = drugs.FirstOrDefault(d => d.Name == pres.name);
+                        return drug != null ? drug.UnitPrice * pres.qty : 0;
+                    });
+
+                    doctorFee = doctroProfile.DoctorFee;
+
+                    hospitalChargeOnly = rates.HospitalCharge;
+                }
+                else
+                {
+                    // cal prescription cost
+                    var prescriptionDruglistTreatment = request.Prescription.Select(p => p.id).ToList();
+
+                    drugs = await _context.Drugs.Where(d => prescriptionDruglistTreatment.Contains(d.Id)).ToListAsync();
+
+                    totalPrescriptionCost = request.Prescription.Sum(pres =>
+                    {
+                        var drug = drugs.FirstOrDefault(d => d.Name == pres.name);
+                        return drug != null ? drug.UnitPrice * pres.qty : 0;
+                    });
+                }
+
+
+
 
 
 
                 //cal treatment chargest
-                var today = DateTime.UtcNow.Date;
+                var today = DateTime.UtcNow;
 
                 var treatmentIds = request.Treatments.Select(t => t.id).ToList();
 
                 var treatments = await _context.Treatments.Where(t => treatmentIds.Contains(t.Id)).ToListAsync();
-                
+          
                 var offers = await _context.Offers.Where(o => treatmentIds.Contains(o.TreatmentId) && o.StartDate <= today && o.EndDate >= today).ToListAsync();
 
                 decimal totalTreatmentCost = 0;
@@ -165,8 +199,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                     VisitId = request.VisitId,
                     PatientId = patientData.Id,
                     DoctorId = loggedInUserId,
-                    DoctorFee = doctroProfile.DoctorFee,
-                    TotalAmount = totalHospitalCharge +  totalPrescriptionCost + totalTreatmentCost + doctroProfile.DoctorFee,
+                    DoctorFee = doctorFee,
+                    TotalAmount = totalHospitalCharge +  totalPrescriptionCost + totalTreatmentCost + doctorFee,
                     InvoiceDescription = new InvoiceDescription
                     {
                         Prescription = request.Prescription,
@@ -175,15 +209,15 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
                         Diagnosis = request.Diagnosis,
                         Rates = new RatesDataDTO
                         {
-                            CustomCharge = rates.CustomCharges,
-                            HospitalCharge = rates.HospitalCharge,
+                            CustomCharge = result.VisitType == PatientVisitTypes.Treatment ? null : rates.CustomCharges,
+                            HospitalCharge = result.VisitType == PatientVisitTypes.Treatment ? 0 : rates.HospitalCharge,
                         }
                         
                     },
                     SubTotal = new SubTotal
                     {
                         CustomCharge = customChargesTotal,
-                        HospitalCharge = rates.HospitalCharge,
+                        HospitalCharge = hospitalChargeOnly,
                         PrescriptionCost = totalPrescriptionCost,
                         TreatmentCharge = totalTreatmentCost
                     },
@@ -434,7 +468,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientLog
             {
                 Id = p.Id,
                 Name = p.Name,
-                NicNumber = p.NiceNumber,
+                NicNumber = p.NicNumber,
                 RegistrationNumber = p.RegistrationNumber,
                 Gender = p.Gender,
                 ContactNo = p.ContactNo,
