@@ -43,16 +43,16 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 string? createdBy = httpContextAccessor.HttpContext?.Items["CreatedBy"]?.ToString();
 
                 // Check if the NIC number already exists
-                bool isNicDuplicate = await _context.Set<PatientModel>().AnyAsync(p => p.NiceNumber == request.NicNumber && p.IsDelete == false);
+                bool isContactDuplicate = await _context.Set<PatientModel>().AnyAsync(p => p.ContactNo == request.ContactNo && p.IsDelete == false);
 
-                if (isNicDuplicate)
+                if (isContactDuplicate)
                 {
                     return new BaseResponse
                     {
                         StatusCode = (int)HttpStatusCode.BadRequest,
                         Data = new
                         {
-                            message = "NIC number already exists."
+                            message = "Contact number already exists."
                         }
                     };
                 }
@@ -77,7 +77,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     City = request.City,
                     District = request.District,
                     Province = request.Province,
-                    NiceNumber = request.NicNumber,
+                    NicNumber = request.NicNumber,
                     IsActive = true,
                     IsDelete = false,
                     CreatedBy = createdBy,
@@ -121,10 +121,12 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             BaseResponse response;
             try
             {
-                List<PatientModel> patients = await _context.Patients.Where(p => p.IsDelete == false).ToListAsync();
+                IQueryable<PatientModel> patientsQuery = _context.Patients.Where(p => p.IsDelete == false);
+                var patientsList = await patientsQuery.ToListAsync();
+                
                 List<PatientListDTO> patientListmapp = new List<PatientListDTO>();
               
-                foreach (var patient in patients)
+                foreach (var patient in patientsList)
                 {
                     patientListmapp.Add(new PatientListDTO
                     {
@@ -134,7 +136,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                         Age = patient.Age,
                         Gender = patient.Gender, 
                         ContactNumber = patient.ContactNo, 
-                        NicNumber = patient.NiceNumber,
+                        NicNumber = patient.NicNumber,
                         IsActive = patient.IsActive,
                         CreatedAt = patient.CreatedAt,
                         CreatedBy = patient.CreatedBy,
@@ -200,7 +202,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     //Weight = patient.Weight,
                     MaritalStatus = patient.MaritalStatus,
                     Occupation = patient.Occupation,
-                    NicNumber = patient.NiceNumber
+                    NicNumber = patient.NicNumber
                     
                 };
                 response = new BaseResponse() 
@@ -247,7 +249,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
 
                 // Check if the NIC number already exists for other patients
                 bool isNicDuplicate = await _context.Set<PatientModel>()
-                                                     .AnyAsync(p => p.NiceNumber == request.NicNumber && p.IsDelete == false && p.Id != id);
+                                                     .AnyAsync(p => p.NicNumber == request.NicNumber && p.IsDelete == false && p.Id != id);
 
                 if (isNicDuplicate)
                 {
@@ -266,7 +268,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 // Update the patient's information
                 patient.Name = request.Name;
                 patient.Age = request.Age;
-                patient.NiceNumber = request.NicNumber;
+                patient.NicNumber = request.NicNumber;
                 patient.ContactNo = request.ContactNo;
                 patient.Gender = request.Gender;
                 //patient.Weight = request.Weight;
@@ -514,7 +516,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 foreach (var req in request.Patients)
                 {
                     
-                    bool isNicDuplicate = await _context.Patients.AnyAsync(p => p.NiceNumber == req.NicNumber && !p.IsDelete);
+                    bool isNicDuplicate = await _context.Patients.AnyAsync(p => p.NicNumber == req.NicNumber && !p.IsDelete);
                     if (isNicDuplicate)
                         continue; 
 
@@ -523,7 +525,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     var patient = new PatientModel
                     {
                         RegistrationNumber = registrationNumber,
-                        NiceNumber = req.NicNumber,
+                        NicNumber = req.NicNumber,
                         Gender = req.Gender,
                         City = req.City,
                         District = req.District,
@@ -594,7 +596,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     Province = patient.Province,
                     MaritalStatus = patient.MaritalStatus,
                     Occupation = patient.Occupation,
-                    NicNumber = patient.NiceNumber
+                    NicNumber = patient.NicNumber
                 };
 
                 // Fetch patient visits
@@ -607,7 +609,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                 {
                     Id = visit.Id,
                     ChitNumber = visit.ChitNumber,
-                    NicNumber = patient.NiceNumber,
+                    NicNumber = patient.NicNumber,
                     DoctorName = GetDoctorName(visit.DoctorId), // Optional: cache or batch load
                     Status = visit.Status == PatientVisitStatus.PENDING_PAYMENT ? "COMPLETED" : "PENDING",
                     PatientName = patient.Name,
@@ -675,7 +677,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
             {
                 Id = p.Id,
                 Name = p.Name,
-                NicNumber = p.NiceNumber,
+                NicNumber = p.NicNumber,
                 RegistrationNumber = p.RegistrationNumber,
                 Gender = p.Gender,
                 ContactNo = p.ContactNo,

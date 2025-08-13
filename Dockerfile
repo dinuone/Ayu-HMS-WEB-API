@@ -1,6 +1,7 @@
 
 # --- build image ---
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+##alpine - smaller size image 5mb - 
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build 
 WORKDIR /src
 COPY . .
 RUN dotnet publish "Harendra_Ayurveda_HMS_WEB_API.csproj"  -o /published /p:UseAppHost=false
@@ -12,7 +13,9 @@ RUN dotnet publish "Harendra_Ayurveda_HMS_WEB_API.csproj"  -o /published /p:UseA
  WORKDIR /app
  COPY --from=build /published .
  EXPOSE 5000
- ENTRYPOINT [ "dotnet", "Harendra_Ayurveda_HMS_WEB_API.dll" ]
+ ENTRYPOINT [ "dotnet", "Harendra_Ayurveda_HMS_WEB_API.dll" ] \
+ # set the container startup command
+ # when the container runs, its execute the dotnet Harendra_Ayurveda_HMS_WEB_API.dll
 
 
 

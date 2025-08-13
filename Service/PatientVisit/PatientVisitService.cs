@@ -231,7 +231,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             {
                 Id = p.Id,
                 Name = p.Name,
-                NicNumber = p.NiceNumber,
+                NicNumber = p.NicNumber,
                 RegistrationNumber = p.RegistrationNumber,
                 Gender = p.Gender,
                 ContactNo = p.ContactNo,
@@ -549,11 +549,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             }
         }
 
-        public async Task<BaseResponse> CheckPatientAccount(string nicNumber)
+        public async Task<BaseResponse> CheckPatientAccount(string contact)
         {
             try
             {
-                PatientModel? patient = await _context.Patients.FirstOrDefaultAsync(c => c.NiceNumber == nicNumber);
+                PatientModel? patient = await _context.Patients.FirstOrDefaultAsync(c => c.ContactNo == contact);
                 CheckAccountDTO account = new CheckAccountDTO();
                 if (patient != null)
                 {
