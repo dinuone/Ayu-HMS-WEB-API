@@ -761,7 +761,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             {
                 var visits = await _context.PatientVisits
                     .Where(v => v.PatientId == patientId && v.IsDelete == false)
-                    .OrderBy(v => v.VisitDate)
+                    .OrderBy(v => v.CreatedAt)
                     .ToListAsync();
 
                 var timeline = new List<PatientVisitTimelineDTO>();
