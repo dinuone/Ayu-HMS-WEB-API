@@ -703,7 +703,9 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
             {
                 long loggedInUserId = userContext.UserId;
 
-                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId && p.Status == PatientVisitStatus.PENDING_PAYMENT || p.Status == PatientVisitStatus.COMPLETE).ToListAsync();
+                List<PatientVisitModel> patientVisits = await _context.PatientVisits.Where(p => p.IsDelete == false && p.DoctorId == loggedInUserId && p.Status == PatientVisitStatus.PENDING_PAYMENT || p.Status == PatientVisitStatus.COMPLETE)
+                                                        .OrderByDescending(p => p.CreatedAt)
+                                                        .ToListAsync();
 
                 List<PatientVisitListDTO> patientList = new();
 
@@ -766,7 +768,7 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
 
                 foreach (var visit in visits)
                 {
-                    var doctor = await _context.Users.FindAsync(visit.DoctorId);
+                    var doctor = await _context.Users.FindAsync(Convert.ToInt32(visit.DoctorId));
                     string doctorName = doctor != null ? $"{doctor.FirstName} {doctor.LastName}" : "Unknown";
 
                     var treatments = visit.Treatment?.Select(t => t.Name).ToList() ?? new List<string>();
@@ -780,7 +782,11 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                         VisitDate = visit.VisitDate,
                         DoctorName = doctorName,
                         Treatments = treatments,
-                        Clinics = clinics
+                        Clinics = clinics,
+                        ChitNo = visit.ChitNumber,
+                        NextVisitDate = patientLog.NextVisitDate,
+                        VisitType = visit.VisitType.ToString(),
+
                     });
                 }
 
