@@ -57,7 +57,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.Patient
                     };
                 }
 
-                string registrationNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync();
+                //string registrationNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync();
+                string registrationNumber = await sequenceGeneratorService.GenerateChitNumberAsync();
 
                 // Upload QR code
                 FileUploadResponse fileUploadResponse = await UploadFileAsync(request.QrCode, $"qr_code_{registrationNumber}.png", registrationNumber, 0);
