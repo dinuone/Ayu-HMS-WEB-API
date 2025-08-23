@@ -92,7 +92,8 @@ namespace Harendra_Ayurveda_HMS_WEB_API.Service.PatientVisit
                 {
                     PatientId = patient.Id,
                     ClinicCategoryId = request.ClinicCategoryId,
-                    ChitNumber = await sequenceGeneratorService.GenerateChitNumberAsync(),
+                    //ChitNumber = await sequenceGeneratorService.GenerateChitNumberAsync(),
+                    ChitNumber = await sequenceGeneratorService.GenerateRegistrationNumberAsync(),
                     Status = PatientVisitStatus.PENDING, 
                     Remarks = request.Remarks,
                     VisitDate = SupportUtils.ConvertUTCDateToLocalDate(DateTime.UtcNow, localTimeZone),
